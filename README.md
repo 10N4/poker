@@ -6,7 +6,7 @@
 
 ## REST API
 JSON code:
-'''
+```
 {
   roles: {
     bigBlind: "idxx",
@@ -73,4 +73,4 @@ JSON code:
   }
 }
 
-'''
+```
