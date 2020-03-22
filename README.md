@@ -1,4 +1,4 @@
-# poker
+# Online poker: Texas Hold'em
 
 ## First Meeting
 * We make 8 constant slots for the players. If there are less than 8 players, the slots will be empty.
@@ -74,3 +74,17 @@ JSON code:
 }
 
 ```
+
+
+## Next steps / milestones
+
+### Backend
+* Define database structure
+* Use MVC: Start with controller in PHP for API
+* Implement database object classes
+* Think again about game logic... Next steps will be discussed then
+
+
+### Frontend
+* Make HTML & CSS prototype
+* AJAX: load JSON and update poker table
