@@ -88,3 +88,7 @@ JSON code:
 ### Frontend
 * Make HTML & CSS prototype
 * AJAX: load JSON and update poker table
+
+
+### Organization
+* Jona: Create database and send others credentials
