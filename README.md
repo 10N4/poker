@@ -81,6 +81,8 @@ JSON code:
 ### Backend
 * Define database structure
 * Use MVC: Start with controller in PHP for API
+* i wrote this
+
 * Implement database object classes
 * Think again about game logic... Next steps will be discussed then
 
