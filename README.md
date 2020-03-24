@@ -8,68 +8,68 @@
 JSON code:
 ```
 {
-  roles: {
-    bigBlind: "idxx",
-    smallBlind: "idyy",
-    activePlayer: "idzz",
+  "roles": {
+    "bigBlind": "idxx",
+    "smallBlind": "idyy",
+    "activePlayer": "idzz"
   },
-  players: [
+  "players": [
     {
-      id: "idxx",
-      name: "Leon", 
-      money: -42,
-      setThisRound: 250
+      "id": "idxx",
+      "name": "Leon", 
+      "money": -42,
+      "setThisRound": 250
     },
     {
-      id: "idyy",
-      name: "Niklas", 
-      money: -42,
-      setThisRound: 250
+      "id": "idyy",
+      "name": "Niklas", 
+      "money": -42,
+      "setThisRound": 250
     },
     {
-      id: "idzz",
-      name: "Leon", 
-      money: -42,
-      setThisRound: 250
+      "id": "idzz",
+      "name": "Leon", 
+      "money": -42,
+      "setThisRound": 250
     },
     {
-      id: "4",
-      name: "Leon", 
-      money: -42,
-      setThisRound: 250
+      "id": "4",
+      "name": "Leon", 
+      "money": -42,
+      "setThisRound": 250
     },
     {
-      id: "5",
-      name: "Leon", 
-      money: -42,
-      setThisRound: 250
+      "id": "5",
+      "name": "Leon", 
+      "money": -42,
+      "setThisRound": 250
     },
     {
-      id: "6",
-      name: "Leon", 
-      money: -42,
-      setThisRound: 250
+      "id": "6",
+      "name": "Leon", 
+      "money": -42,
+      "setThisRound": 250
     }
   ],
-  card1: {
-    color: "P",
-    card: 7
+  "card1": {
+    "color": "P",
+    "card": 7
   },
-  card2: {
-    color: "H",
-    card: 36
+  "card2": {
+    "color": "H",
+    "card": 36
   },
-  card3: {
-    color: "C",
-    card: 25
+  "card3": {
+    "color": "C",
+    "card": 25
   },
-  card4: {
-    color: "null",
-    card: 0
+  "card4": {
+    "color": "null",
+    "card": 0
   },
-  card5: {
-    color: "null",
-    card: 0
+  "card5": {
+    "color": "null",
+    "card": 0
   }
 }
 
@@ -79,18 +79,14 @@ JSON code:
 ## Next steps / milestones
 
 ### Backend
-* Define database structure
+* Define database structure. Create ERM with yEd
 * Use MVC: Start with controller in PHP for API
-* i wrote this
-
 * Implement database object classes
 * Think again about game logic... Next steps will be discussed then
-
 
 ### Frontend
 * Make HTML & CSS prototype
 * AJAX: load JSON and update poker table
-
 
 ### Organization
 * Jona: Create database and send others credentials
