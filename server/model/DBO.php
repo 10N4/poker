@@ -66,6 +66,8 @@ abstract class DBO
 		$this->values[$field] = $value;
 	}
 
+	protected abstract function getTable();
+
 	// endregion
 
 	// region helper

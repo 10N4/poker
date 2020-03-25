@@ -88,4 +88,9 @@ class Player extends DBO
 		};
 		static::forEachInstance($setUpdateFalse);
 	}
+
+	protected function getTable()
+	{
+		return "poker_player";
+	}
 }
