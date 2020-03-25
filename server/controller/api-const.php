@@ -1,6 +1,7 @@
 <?php
 // Request Parameter Names
-define("ACTION", "action");
+define("P_ACTION", "action");
+define("P_PLAYER_ID", "player_id");
 
 // GET Requests
 define("A_UPDATE", "action_update");

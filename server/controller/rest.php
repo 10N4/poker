@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 include "api-const.php";
 include "action.php";
 
@@ -17,20 +19,21 @@ switch ($_SERVER["REQUEST_METHOD"]) {
 		break;
 }
 
-function get()
+function get(): void
 {
-	$action = $_GET[ACTION];
+	$action = $_GET[P_ACTION];
 	if ($action == A_UPDATE) {
-		$result = update();
+		$playerId = $_GET[P_PLAYER_ID];
+		$result = update($playerId);
 	} else {
 		$result = R_ERROR;
 	}
 	makeOutput($result);
 }
 
-function post()
+function post(): void
 {
-	$action = $_POST[ACTION];
+	$action = $_POST[P_ACTION];
 
 	switch ($action) {
 		case A_ENTER_GAME:
@@ -61,12 +64,12 @@ function post()
 	makeOutput($result);
 }
 
-function put()
+function put(): void
 {
 
 }
 
-function delete()
+function delete(): void
 {
 
 }
