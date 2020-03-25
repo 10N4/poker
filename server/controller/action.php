@@ -28,9 +28,18 @@ function check(): string
 	return R_OK;
 }
 
-function bet(): string
+function bet($playerId): string
 {
 	Player::setAllUnUpdated();
+
+	// ist jetzt nichts besonders sinnvolles:
+
+	/** @var Player $player */
+	$player = Player::loadById($playerId);
+	$player->setCard1("Eine Karte");
+	$player->setCard2("Zweite Karte");
+
+	$player->update();
 
 	return R_OK;
 }
@@ -38,6 +47,9 @@ function bet(): string
 function call(): string
 {
 	Player::setAllUnUpdated();
+	/** @var Player $player */
+	$player = new Player();
+	$player->create();
 
 	return R_OK;
 }

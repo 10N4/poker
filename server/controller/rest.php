@@ -43,7 +43,8 @@ function post(): void
 			$result = check();
 			break;
 		case A_BET:
-			$result = bet();
+			$playerId = $_POST[P_PLAYER_ID];
+			$result = bet($playerId);
 			break;
 		case A_CALL:
 			$result = call();
