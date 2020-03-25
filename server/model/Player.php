@@ -68,7 +68,7 @@ class Player extends DBO
 
 	public function isUpdated(): bool
 	{
-		return $this->getValue(self::WAGER);
+		return $this->getValue(self::IS_UPDATED);
 	}
 
 	public function setUpdated($flag): void
@@ -89,7 +89,12 @@ class Player extends DBO
 		static::forEachInstance($setUpdateFalse);
 	}
 
-	protected function getTable()
+	protected static function getTable()
+	{
+		return "poker_player";
+	}
+
+	protected static function getColumns()
 	{
 		return "poker_player";
 	}

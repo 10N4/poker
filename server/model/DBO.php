@@ -1,18 +1,22 @@
 <?php
 
-
 namespace poker_model;
+
+use PDOStatement;
+
+include "server/db.php";
+include "server/function.php";
 
 
 abstract class DBO
 {
-	private const ID = "id";
+	protected const ID = 'id';
+	private $id = -1;
 
 	private $values = array();
 
 	public function __construct()
 	{
-		$this->values[self::ID] = 0;
 	}
 
 	// region DB Control
@@ -29,7 +33,23 @@ abstract class DBO
 
 	public function create(): void
 	{
+		if (!$this->isCreated()) {
+			return;
+		}
 
+		$table = static::getTable();
+		$columnString = implode(",", static::getColumns());
+		$paramString = implode(",", $this->getKeysAsParams());
+
+		$sql = "INSERT INTO {$table} {$columnString} VALUES ({$paramString})";
+		$stmt = pdo()->prepare($sql);
+		$stmt = $this->getStmtBind($stmt);
+		$stmt->execute() or dieSqlError("8e4f141a-9cf2-4d4c-8def-e916964680c8");
+
+		$sql = "SELECT MAX(" . self::ID . ") as max_id FROM {$table} LIMIT 1";
+		$result = pdo()->query($sql)->fetch(\PDO::FETCH_ASSOC);
+
+		$this->id = $result["max_id"];
 	}
 
 	public function update(): void
@@ -48,12 +68,12 @@ abstract class DBO
 
 	public function getId(): int
 	{
-		return $this->values[self::ID];
+		return $this->id;
 	}
 
 	public function isCreated(): bool
 	{
-		return $this->values[self::ID] == 0;
+		return $this->id == -1;
 	}
 
 	protected function getValue($field)
@@ -66,11 +86,52 @@ abstract class DBO
 		$this->values[$field] = $value;
 	}
 
-	protected abstract function getTable();
-
 	// endregion
 
 	// region helper
+
+
+	private function getKeysAsParams(): array
+	{
+		$params = array();
+		foreach ($this->values as $key => $value) {
+			$params[] = ':' . $key;
+		}
+		return $params;
+	}
+
+	/**
+	 * @param PDOStatement $stmt
+	 * @return PDOStatement
+	 */
+	private function getStmtBind($stmt): PDOStatement
+	{
+		foreach ($this->values as $key => $value) {
+			$stmt->bindValue(':' . $key, $value);
+		}
+		return $stmt;
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	protected abstract static function getTable(): string;
+
+	protected abstract static function getColumns(): array;
 
 	public static function forEachInstance($fun): void
 	{
