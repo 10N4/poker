@@ -7,70 +7,70 @@ use poker_model\Player;
 
 function update($playerId): string
 {
-	/** @var Player $player */
-	$player = Player::loadById($playerId);
-	if ($player->isUpdated()) {
-		return "R_EMPTY";
-	}
-	return R_OK;
+    /** @var Player $player */
+    $player = Player::loadById($playerId);
+    if ($player->isUpdated()) {
+        return "R_EMPTY";
+    }
+    return R_OK;
 }
 
 function enterGame(): string
 {
-	Player::setAllUnUpdated();
-	return R_OK;
+    Player::setAllUnUpdated();
+    return R_OK;
 }
 
 function check(): string
 {
-	Player::setAllUnUpdated();
+    Player::setAllUnUpdated();
 
-	return R_OK;
+    return R_OK;
 }
 
 function bet($playerId): string
 {
-	Player::setAllUnUpdated();
+    Player::setAllUnUpdated();
 
-	// ist jetzt nichts besonders sinnvolles:
+    // ist jetzt nichts besonders sinnvolles:
 
-	/** @var Player $player */
-	$player = Player::loadById($playerId);
-	$player->setCard1("Eine Karte");
-	$player->setCard2("Zweite Karte");
+    /** @var Player $player */
+    $player = Player::loadById($playerId);
+    $player->setCard1("Eine Karte");
+    $player->setCard2("Zweite Karte");
 
-	$player->update();
+    $player->update();
 
-	return R_OK;
+    return R_OK;
 }
 
 function call(): string
 {
-	Player::setAllUnUpdated();
-	/** @var Player $player */
-	$player = new Player();
-	$player->create();
+    Player::setAllUnUpdated();
+    /** @var Player $player */
+    $player = new Player();
+    $player->create();
 
-	return R_OK;
+    return R_OK;
 }
 
 function raise(): string
 {
-	Player::setAllUnUpdated();
+    Player::setAllUnUpdated();
 
-	return R_OK;
+    return R_OK;
 }
 
 function fold(): string
 {
-	Player::setAllUnUpdated();
+    Player::setAllUnUpdated();
 
-	return R_OK;
+    return R_OK;
 }
 
 function exitGame(): string
 {
-	Player::setAllUnUpdated();
+    Player::setAllUnUpdated();
 
-	return R_OK;
+    return R_OK;
 }
