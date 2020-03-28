@@ -4,8 +4,8 @@ namespace poker_model;
 
 use PDOStatement;
 
-include "server/db.php";
-include "server/function.php";
+require_once "server/db.php";
+require_once "server/function.php";
 
 
 abstract class DBO
@@ -33,6 +33,7 @@ abstract class DBO
 
     public function create(): void
     {
+        return;
         if (!$this->isCreated()) {
             return;
         }
@@ -54,11 +55,13 @@ abstract class DBO
 
     public function update(): void
     {
+        return;
 
     }
 
     public function delete(): void
     {
+        return;
 
     }
 
@@ -120,6 +123,20 @@ abstract class DBO
     public static function forEachInstance($fun): void
     {
 
+    }
+
+    public function toJson(...$fields)
+    {
+        if (count($fields) == 0) {
+            return json_encode($this->values);
+        }
+        $encodeValues = array();
+        foreach ($this->values as $key => $value) {
+            if (in_array($key, $fields)) {
+                $encodeValues[$key] = $value;
+            }
+        }
+        return json_encode($encodeValues);
     }
 
     // endregion

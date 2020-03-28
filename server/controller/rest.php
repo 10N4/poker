@@ -1,8 +1,8 @@
 <?php
 declare(strict_types=1);
 
-include "api-const.php";
-include "action.php";
+require_once "api-const.php";
+require_once "action.php";
 
 switch ($_SERVER["REQUEST_METHOD"]) {
     case "GET":
@@ -36,9 +36,20 @@ function post(): void
     $action = $_POST[P_ACTION];
 
     switch ($action) {
+        // General Actions
+        case A_CREATE_GAME:
+            $name = $_POST[P_NAME];
+            $startMoney = $_POST[P_START_MONEY];
+            $playerId = $_POST[P_PLAYER_ID];
+            $result = createGame($name, $startMoney, $playerId);
+            break;
         case A_ENTER_GAME:
             $result = enterGame();
             break;
+        case A_EXIT_GAME:
+            $result = exitGame();
+            break;
+        // Poker Actions
         case A_CHECK:
             $result = check();
             break;
@@ -54,9 +65,6 @@ function post(): void
             break;
         case A_FOLD:
             $result = fold();
-            break;
-        case A_EXIT_GAME:
-            $result = exitGame();
             break;
         default:
             $result = R_ERROR;

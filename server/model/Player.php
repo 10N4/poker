@@ -6,17 +6,17 @@ namespace poker_model;
 
 class Player extends DBO
 {
-    private const NAME = "name";
-    private const GAME_ID = "game_id";
-    private const IS_ACTIVE = "is_active";
-    private const IS_PAUSED = "is_paused";
-    private const COOKIE_ID = "cookie_id";
-    private const CARD1 = "card1";
-    private const CARD2 = "card2";
-    private const MONEY = "money";
-    private const CURRENT_BET = "current_bet";
-    private const TOTAL_BET = "total_bet";
-    private const IS_UPDATED = "is_updated";
+    const NAME = "name";
+    const GAME_ID = "game_id";
+    const IS_ACTIVE = "is_active";
+    const IS_PAUSED = "is_paused";
+    const COOKIE_ID = "cookie_id";
+    const CARD1 = "card1";
+    const CARD2 = "card2";
+    const MONEY = "money";
+    const CURRENT_BET = "current_bet";
+    const TOTAL_BET = "total_bet";
+    const IS_UPDATED = "is_updated";
 
     //region getter and setter
 
@@ -132,6 +132,11 @@ class Player extends DBO
 
     // endregion
 
+    public function getCards()
+    {
+        return array($this->getCard1(), $this->getCard2());
+    }
+
     public static function setAllUnUpdated(): void
     {
         /**
@@ -141,6 +146,41 @@ class Player extends DBO
             $player->setUpdated(false);
         };
         static::forEachInstance($setUpdateFalse);
+    }
+
+    public static function getPlayerByCookieId($cookieId)
+    {
+        return Player::load(self::COOKIE_ID, $cookieId);
+    }
+
+    public static function init($name, $link): Player
+    {
+        $player = new Player();
+
+        $player->setName($name);
+        /** @var Game $game */
+        $game = Game::getGameByLink($link);
+        $player->setGameId($game->getId());
+        $player->setActive(false);
+        $player->setPaused(false);
+
+        $cookieId = '';
+        $cookieIdExists = true;
+        while ($cookieIdExists) {
+            $cookieId = generateRandomString();
+            if (self::getPlayerByCookieId($cookieId) == null) {
+                $cookieIdExists = false;
+            }
+        }
+        $player->setCookieId($cookieId);
+        $deck = new CardDeckManager();
+        $cards = $deck->getRandomCardsByGame($player->getGameId(), 2);
+        $player->setCard1($cards[0]);
+        $player->setCard2($cards[1]);
+        $player->setMoney($game->getStartMoney());
+        $player->setCurrentBet(0);
+        $player->setTotalBet(0);
+        $player->setUpdated(false);
     }
 
     protected static function getTable(): string

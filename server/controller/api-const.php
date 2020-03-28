@@ -2,6 +2,8 @@
 // Request Parameter Names
 define("P_ACTION", "action");
 define("P_PLAYER_ID", "player_id");
+define("P_NAME", "name");
+define("P_START_MONEY", "start_money");
 
 // GET Requests
 define("A_UPDATE", "action_update");

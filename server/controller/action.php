@@ -1,8 +1,10 @@
 <?php
 declare(strict_types=1);
 
-include "api-const.php";
+require_once "api-const.php";
+require_once "server/model/Game.php";
 
+use poker_model\Game;
 use poker_model\Player;
 
 function update($playerId): string
@@ -10,67 +12,55 @@ function update($playerId): string
     /** @var Player $player */
     $player = Player::loadById($playerId);
     if ($player->isUpdated()) {
-        return "R_EMPTY";
+        return R_EMPTY;
     }
     return R_OK;
 }
 
-function enterGame(): string
+// General Actions
+function createGame($name, $startMoney, $playerId): string
 {
-    Player::setAllUnUpdated();
-    return R_OK;
+    /** @var Game $game */
+    $game = Game::init($name, $startMoney, $playerId);
+    $game->create();
+    return $game->toJson(Game::LINK);
 }
 
-function check(): string
+function enterGame($name, $link): string
 {
-    Player::setAllUnUpdated();
-
-    return R_OK;
-}
-
-function bet($playerId): string
-{
-    Player::setAllUnUpdated();
-
-    // ist jetzt nichts besonders sinnvolles:
-
-    /** @var Player $player */
-    $player = Player::loadById($playerId);
-    $player->setCard1("Eine Karte");
-    $player->setCard2("Zweite Karte");
-
-    $player->update();
-
-    return R_OK;
-}
-
-function call(): string
-{
-    Player::setAllUnUpdated();
-    /** @var Player $player */
-    $player = new Player();
+    $player = Player::init($name, $link);
     $player->create();
-
-    return R_OK;
-}
-
-function raise(): string
-{
-    Player::setAllUnUpdated();
-
-    return R_OK;
-}
-
-function fold(): string
-{
-    Player::setAllUnUpdated();
 
     return R_OK;
 }
 
 function exitGame(): string
 {
-    Player::setAllUnUpdated();
+    return R_OK;
+}
 
+// Poker Actions
+function check(): string
+{
+    return R_OK;
+}
+
+function bet($playerId): string
+{
+    return R_OK;
+}
+
+function call(): string
+{
+    return R_OK;
+}
+
+function raise(): string
+{
+    return R_OK;
+}
+
+function fold(): string
+{
     return R_OK;
 }
