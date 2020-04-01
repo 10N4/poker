@@ -1,24 +1,209 @@
 <!DOCTYPE html>
 <html lang="de">
-    <head>
-        <meta charset="UTF-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, minimum-scale=1.0, maximum-scale=2.0">
-        <title>Online-Poker</title>
-        <link href="styles/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-        <link rel="apple-touch-icon" href="img/logo.png">
-        <link rel="shortcut icon" href="img/logo.png">
-        <link rel="stylesheet" href="styles/main.css" />
-    </head>
-    <body>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, minimum-scale=1.0, maximum-scale=2.0">
+    <title>Online-Poker</title>
 
-        <div class="player_me_box">
-            
-            
+    <link rel="stylesheet" href="client/bootstrap/css/bootstrap.min.css">
+
+    <!-- Scrollbar Custom CSS -->
+    <link rel="stylesheet" href="client/css/jquery.mCustomScrollbar.min.css">
+
+    <link rel="stylesheet" href="client/css/main.css">
+
+    <!-- Font Awesome JS -->
+    <script defer src="client/js/fontawesome_solid.js"></script>
+    <script defer src="client/js/fontawesome.js"></script>
+
+</head>
+
+<body>
+
+    <div class="wrapper">
+        <!-- Sidebar  -->
+        <nav id="sidebar">
+            <div id="dismiss">
+                <i class="fas fa-arrow-left"></i>
+            </div>
+
+            <div class="sidebar-header">
+                <h3>Online Poker</h3>
+            </div>
+
+            <ul class="list-unstyled components">
+                <li>
+                    <a href="#">Spiel pausieren</a>
+                </li>
+                <li>
+                    <a href="#homeSubmenu" data-toggle="collapse" aria-expanded="false">Dropdown Beispiel</a>
+                    <ul class="collapse list-unstyled" id="homeSubmenu">
+                        <li>
+                            <a href="#">Home 1</a>
+                        </li>
+                        <li>
+                            <a href="#">Home 2</a>
+                        </li>
+                        <li>
+                            <a href="#">Home 3</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+
+            <ul class="list-unstyled CTAs">
+                <li>
+                    <a href="" class="download">Spiel verlassen</a>
+                </li>
+                <li class="backToGame">
+                    <a href="#" class="article">Zurück zum Spiel</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    <div class="nav_menu">
+        <button type="button" id="sidebarCollapse" class="btn btn-info">
+            <i class="fas fa-align-left"></i>
+            <span>Menü</span>
+        </button>
+    </div>
+
+    <div class="overlay"></div>
+    <div class="first_row">
+        <div class="player_box player_3_box">
+            <div class="player_inner">
+                <h2 class="player_name">Player 3</h2>
+                <img src="client/img/profil.png" class="player_img">
+                <p>Guthaben: <span class="player_money">5000€</span></p>
+                <p>Diese Runde gesetzt: <span class="player_current_bet">50</span></p>
+            </div>
         </div>
-        
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-        <script src="styles/bootstrap/js/bootstrap.min.js"></script>
-    </body>
+        <div class="player_4_box">
+            <div class="player_inner">
+                <h2 class="player_name">Player 4</h2>
+                <img src="client/img/profil.png" class="player_img">
+                <p>Guthaben: <span class="player_money">5000€</span></p>
+                <p>Diese Runde gesetzt: <span class="player_current_bet">50</span></p>
+            </div>
+        </div>
+        <div class="player_5_box">
+            <div class="player_inner">
+                <h2 class="player_name">Player 5</h2>
+                <img src="client/img/profil.png" class="player_img">
+                <p>Guthaben: <span class="player_money">5000€</span></p>
+                <p>Diese Runde gesetzt: <span class="player_current_bet">50</span></p>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="second_row">
+        <div class="player_2_box">
+            <div class="player_inner">
+                <h2 class="player_name">Player 2</h2>
+                <img src="client/img/profil.png" class="player_img">
+                <p>Guthaben: <span class="player_money">5000€</span></p>
+                <p>Diese Runde gesetzt: <span class="player_current_bet">50</span></p>
+            </div>
+        </div>
+        <div class="cards_outer_box">
+            <div class="card_box">
+                <img src="client/cards/QH.svg" class="card">
+            </div>
+            <div class="card_box">
+                <img src="client/cards/2C.svg" class="card">
+            </div>
+            <div class="card_box">
+                <img src="client/cards/5D.svg" class="card">
+            </div>
+            <div class="card_box">
+                <img src="client/cards/AS.svg" class="card">
+            </div>
+            <div class="card_box">
+                <img src="client/cards/5S.svg" class="card">
+            </div>
+        </div>
+        <div class="player_6_box">
+            <div class="player_inner">
+                <h2 class="player_name">Player 6</h2>
+                <img src="client/img/profil.png" class="player_img">
+                <p>Guthaben: <span class="player_money">5000€</span></p>
+                <p>Diese Runde gesetzt: <span class="player_current_bet">50</span></p>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="third_row">
+        <div class="player_1_box">
+            <div class="player_inner">
+                <h2 class="player_name">Player 1</h2>
+                <img src="client/img/profil.png" class="player_img">
+                <p>Guthaben: <span class="player_money">5000€</span></p>
+                <p>Diese Runde gesetzt: <span class="player_current_bet">50</span></p>
+            </div>
+        </div>
+        <div class="player_me_box">
+            <div class="player_inner">
+                <div class="player_left_side">
+                    <h2 class="player_name">Ich</h2>
+                    <p>Guthaben: <span class="player_money">5000€</span></p>
+                    <p>Diese Runde gesetzt: <span class="player_current_bet">50</span></p>
+                </div>
+                <div class="player_right_side">
+                    <img src="client/cards/AS.svg" class="player_img_own_cards">
+                    <img src="client/cards/AC.svg" class="player_img_own_cards">
+                </div>
+                <div class="player_space"></div>
+                <button class="player_action player_action_call">Call</button>
+                <button class="player_action player_action_raise">Raise</button>
+                <button class="player_action player_action_fold">Fold</button>
+            </div>
+        </div>
+        <div class="player_7_box">
+            <div class="player_inner">
+                <h2 class="player_name">Player 7</h2>
+                <img src="client/img/profil.png" class="player_img">
+                <p>Guthaben: <span class="player_money">5000€</span></p>
+                <p>Diese Runde gesetzt: <span class="player_current_bet">50</span></p>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+    <script src="client/js/jquery.min.js"></script>
+    <script src="client/bootstrap/js/bootstrap.min.js"></script>
+    <script src="client/js/jquery.mCustomScrollbar.concat.min.js"></script>
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#sidebar").mCustomScrollbar({
+                theme: "minimal"
+            });
+
+            $('#dismiss, .overlay, .backToGame').on('click', function () {
+                $('#sidebar').removeClass('active');
+                $('.overlay').removeClass('active');
+            });
+
+            $('#sidebarCollapse').on('click', function () {
+                $('#sidebar').addClass('active');
+                $('.overlay').addClass('active');
+                $('.collapse.in').toggleClass('in');
+                $('a[aria-expanded=true]').attr('aria-expanded', 'false');
+            });
+        });
+    </script>
+
+
+</body>
+
 </html>
