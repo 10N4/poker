@@ -72,7 +72,7 @@
 
     <div class="overlay"></div>
     <div class="first_row">
-        <div class="player_box player_3_box">
+        <div class="player_3_box">
             <div class="player_inner">
                 <h2 class="player_name">Player 3</h2>
                 <img src="client/img/profil.png" class="player_img">
@@ -182,6 +182,45 @@
     <script src="client/js/jquery.mCustomScrollbar.concat.min.js"></script>
 
 
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $(".player_3_box .player_money").html("Test");
+
+        });
+            $.ajax({
+			type: "POST",
+			url: "json_test.txt",
+			data: { name: "JOKOOOOW OOWNOOO" },
+			complete: function(e, xhr, settings){
+				switch(e.status){
+				case 500:
+					alert('500 internal server error!');
+					break;
+				case 404:
+					alert('404 Page not found!');
+					break;
+				case 401:
+			 		alert('401 unauthorized access');     
+					break;       
+				}
+			}           
+			}).done(function( data ) {
+			var obj = jQuery.parseJSON(data)
+
+			if (obj.success == 1){
+
+				$('div#insert_html_div').html(obj.html);
+
+			}else if (obj.error == 1){
+
+
+			}
+
+
+			// etc
+
+			});
+    </script>
 
     <script type="text/javascript">
         $(document).ready(function () {
