@@ -4,12 +4,13 @@ declare(strict_types=1);
 require_once "api-const.php";
 require_once "action.php";
 
+$action = $_REQUEST[P_ACTION];
 switch ($_SERVER["REQUEST_METHOD"]) {
     case "GET":
-        get();
+        get($action);
         break;
     case "POST":
-        post();
+        post($action);
         break;
     case "PUT":
         put();
@@ -19,35 +20,36 @@ switch ($_SERVER["REQUEST_METHOD"]) {
         break;
 }
 
-function get(): void
+function get($action): void
 {
-    $action = $_GET[P_ACTION];
     if ($action == A_UPDATE) {
         $playerId = $_GET[P_PLAYER_ID];
-        $result = update($playerId);
+        $result = getUpdate($playerId);
     } else {
         $result = R_ERROR;
     }
     makeOutput($result);
 }
 
-function post(): void
+function post($action): void
 {
-    $action = $_POST[P_ACTION];
-
     switch ($action) {
         // General Actions
-        case A_CREATE_GAME:
-            $name = $_POST[P_NAME];
+        case A_VALIDATE:
+            validate();
+            break;
+        case A_CREATE_SESSION:
+            $playerName = $_POST[P_PLAYER_NAME];
+            $sessionName = $_POST[P_SESSION_NAME];
             $startMoney = $_POST[P_START_MONEY];
-            $playerId = $_POST[P_PLAYER_ID];
-            $result = createGame($name, $startMoney, $playerId);
+            $result = createSession($playerName, $sessionName, $startMoney);
             break;
-        case A_ENTER_GAME:
-            $result = enterGame();
+        case A_ENTER_SESSION:
+            $globalSessionId = $_POST[P_GLOBAL_SESSION_ID];
+            $result = enterSession();
             break;
-        case A_EXIT_GAME:
-            $result = exitGame();
+        case A_EXIT_SESSION:
+            $result = exitSession();
             break;
         // Poker Actions
         case A_CHECK:

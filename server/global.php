@@ -1,4 +1,13 @@
 <?php
+function pdo()
+{
+    $host = "";
+    $username = "";
+    $password = "";
+    $dbname = "";
+    return new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
+}
+
 function dieFatalError($code)
 {
     die("Schwerwiegender Fehler, der die Sicherheit und Stabilität des Systems betrifft! Code: " . $code);

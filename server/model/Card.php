@@ -3,7 +3,11 @@
 
 namespace poker_model;
 
-
+/**
+ *
+ * Class Card
+ * @package poker_model
+ */
 class Card
 {
     public const COLOR_DIAMONDS = 'd';
@@ -67,6 +71,12 @@ class Card
         return array(self::COLOR_DIAMONDS, self::COLOR_HEARTS, self::COLOR_SPADES, self::COLOR_CLUBS);
     }
 
+    /**
+     * Creates a Card from a Card-representation
+     * @param string $rep
+     * @return Card
+     * @throws ParseException
+     */
     public static function parse(string $rep): Card
     {
         $colors = implode('', self::getAllColors());

@@ -21,14 +21,15 @@ class CardDeckManager
         }
     }
 
-    public function getRandomCardsByGame($gameId, $number)
+    public function getRandomCardsBySession($sessionId, $number)
     {
-        /** @var Game $game */
-        $game = Game::loadById($gameId);
+        return $this->getRandomCards($number);
+        /** @var Session $session */
+        $session = Session::loadById($sessionId);
         /** @var Player $players */
-        $players = Player::load(Player::GAME_ID, $gameId);
+        $players = Player::load(Player::SESSION_ID, $sessionId);
 
-        $usedCards = array_merge($game->getCards(), $players->getCards());
+        $usedCards = array_merge($session->getCards(), $players->getCards());
 
         return $this->getRandomCards($number, $usedCards);
     }

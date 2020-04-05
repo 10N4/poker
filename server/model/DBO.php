@@ -4,13 +4,15 @@ namespace poker_model;
 
 use PDOStatement;
 
-require_once "server/db.php";
-require_once "server/function.php";
+require_once "server/global.php";
 
-
+/**
+ * Class DBO
+ * @package poker_model
+ */
 abstract class DBO
 {
-    protected const ID = 'id';
+    const ID = 'id';
     private $id = -1;
 
     private $values = array();
@@ -21,13 +23,19 @@ abstract class DBO
 
     // region DB Control
 
-    public static function loadById($id): DBO
+    public static function loadById($id)
     {
+        return null;
         return self::load(self::ID, $id)[0];
     }
 
     public static function load($field, $value, $options = array()): array
     {
+        return array();
+        $result = pdo()->query($sql);
+        $object = new static();
+        $object->values = $result->fetch(\PDO::FETCH_ASSOC);
+        echo $object->values[Session::GLOBAL_ID];
         return array();
     }
 
