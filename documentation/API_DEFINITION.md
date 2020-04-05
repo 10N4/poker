@@ -93,3 +93,77 @@ Server answer:
 
 
 ## Join game
+Client request:
+```
+```
+
+
+Server answer:
+```
+```
+
+
+## Exit game
+Client request:
+```
+```
+
+
+Server answer:
+```
+```
+
+
+## Checken
+Client request:
+```
+```
+
+
+Server answer:
+```
+```
+
+
+## Bet
+Client request:
+```
+```
+
+
+Server answer:
+```
+```
+
+
+## Call
+Client request:
+```
+```
+
+
+Server answer:
+```
+```
+
+
+## Raise
+Client request:
+```
+```
+
+
+Server answer:
+```
+```
+
+
+## Fold
+Client request:
+```
+```
+
+
+Server answer:
+```
+```
