@@ -1,12 +1,33 @@
 # Definition of REST API
+All requests are sent to `/server/controller/rest.php`.
+
+With every request, also the `authenticationID` is transmitted as a cookie.
+
+## GET
+For `GET` requests, the server returns a JSON.
 
 
-## Update
+### Cards
 Client request:
 ```
+P_ACTION: A_UPDATE
+```
+
+
+Server answer:
+```
 {
-  P_ACTION: A_UPDATE
+  "card1": "h12",
+  "card2": "d3"
 }
+```
+
+
+
+### Update
+Client request:
+```
+P_ACTION: A_UPDATE
 ```
 
 
@@ -14,9 +35,10 @@ Server answer:
 ```
 {
   "roles": {
-    "bigBlind": "idxx",
-    "smallBlind": "idyy",
-    "activePlayer": "42"
+    "dealer": "35",
+    "smallBlind": "36",
+    "bigBlind": "42",
+    "activePlayer": "53"
   },
   "players": [
     {
@@ -68,102 +90,117 @@ Server answer:
       "setThisRound": 150
     }
   ],
-  "card1": {
-    "color": "P",
-    "card": "QH"
-  },
-  "card2": {
-    "color": "H",
-    "card": "2C"
-  },
-  "card3": {
-    "color": "C",
-    "card": "5D"
-  },
-  "card4": {
-    "color": "null",
-    "card": 0
-  },
-  "card5": {
-    "color": "null",
-    "card": 0
-  }
+  "card1": "QH",
+  "card2": "2C",
+  "card3": "5D",
+  "card4": 0,
+  "card5": 0
 }
 ```
 
-
-## Join game
+### Create Session
 Client request:
 ```
+P_ACTION=A_ENTER_SESSION&P_SESSION_NAME=session_name&P_PLAYER_NAME=player_name
 ```
 
 
 Server answer:
 ```
+R_OK, R_ERROR
 ```
 
 
-## Exit game
+
+## POST
+
+
+### Join session
 Client request:
 ```
+P_ACTION=A_ENTER_SESSION&P_SESSION_NAME=session_name&P_PLAYER_NAME=player_name
 ```
 
 
 Server answer:
 ```
+R_GAME_STARTED: boolean
 ```
 
 
-## Checken
+### Exit session
 Client request:
 ```
+P_ACTION=A_EXIT_SESSION
 ```
 
 
 Server answer:
 ```
+R_OK, R_ERROR
 ```
 
 
-## Bet
+### Checken
 Client request:
 ```
+P_ACTION=A_CHECK
 ```
 
 
 Server answer:
 ```
+R_OK, R_ERROR
 ```
 
 
-## Call
+### Bet
 Client request:
 ```
+P_ACTION=A_BET&BET_VALUE=bet_value
 ```
 
 
 Server answer:
 ```
+R_OK, R_ERROR
 ```
 
 
-## Raise
+### Call
 Client request:
 ```
+P_ACTION=A_CALL
 ```
 
 
 Server answer:
 ```
+R_OK, R_ERROR
 ```
 
 
-## Fold
+### Raise
 Client request:
 ```
+P_ACTION=A_RAISE&RAISE_VALUE=raise_value
 ```
 
 
 Server answer:
 ```
+R_OK, R_ERROR
+```
+
+
+### Fold
+Client request:
+```
+P_ACTION=A_FOLD
+```
+
+
+Server answer:
+```
+R_OK, R_ERROR
 ```
