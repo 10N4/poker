@@ -1,23 +1,34 @@
 <?php
 function pdo()
 {
-    $host = "";
+    // LIVE
+    /*$host = "";
     $username = "";
     $password = "";
-    $dbname = "";
+    $dbname = "poker";*/
+
+    // Niklas
+    $host = "localhost";
+    $username = "root";
+    $password = "RXvQi2l8m81QlhXa";
+    $dbname = "poker";
+
     return new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
 }
 
 function dieFatalError($code)
 {
-    die("Schwerwiegender Fehler, der die Sicherheit und Stabilität des Systems betrifft! Code: " . $code);
+    if (DEBUG) {
+        die("Schwerwiegender Fehler, der die Sicherheit und Stabilität des Systems betrifft! Code: " . $code);
+    } else {
+        die();
+    }
 }
 
 function dieSqlError($code)
 {
     die("SQL-Fehler! Code: " . $code);
 }
-
 
 function generateRandomString($length = 32)
 {

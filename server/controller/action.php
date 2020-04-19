@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-require_once "api-const.php";
+require_once "rest-const.php";
 require_once "server/model/Session.php";
 require_once "server/model/Player.php";
 
@@ -11,17 +11,19 @@ use poker_model\Player;
 function getUpdate($authenticationId): string
 {
     /** @var Player $player */
-    $player = Player::getPlayerByAuthenticationId($authenticationId);
+    $player = Player::loadPlayerByAuthenticationId($authenticationId);
     if ($player->isUpdated()) {
         return R_EMPTY;
+    } else {
+        // TODO: return json
     }
-    // TODO: return json
+
     return R_OK;
 }
 
 function getCards($authenticationId)
 {
-    $player = Player::getPlayerByAuthenticationId($authenticationId);
+    $player = Player::loadPlayerByAuthenticationId($authenticationId);
     return $player->toJson(Player::CARD1, Player::CARD2);
 }
 
@@ -58,8 +60,8 @@ function createSession($playerName, $sessionName, $startMoney): string
     /** @var Session $session */
     $session = Session::init($sessionName, $startMoney);
     $player = Player::init($playerName, $session);
-    $session->create();
-    $player->create();
+    $session->insert();
+    $player->insert();
     return json_encode(array(
         PLAYER => $player->toJson(Player::AUTHENTICATION_ID, Player::NAME),
         SESSION => $session->toJson(Session::GLOBAL_ID),
@@ -67,17 +69,14 @@ function createSession($playerName, $sessionName, $startMoney): string
     ));
 }
 
-function enterSession($name, $globalSessionId): string
+function enterSession($playerName, $globalSessionId): string
 {
     $session = Session::getSessionByGlobalId($globalSessionId);
     if ($session->isFull()) {
         return R_SESSION_FULL;
     }
-    $player = Player::init($name, $globalSessionId);
-    if ($player == null) {
-        return R_SESSION_FULL;
-    }
-    $player->create();
+    $player = Player::init($playerName, $globalSessionId);
+    $player->insert();
     return json_encode(array(
         PLAYER => $player->toJson(Player::AUTHENTICATION_ID, Player::NAME),
         SESSION => $session->toJson(Session::GLOBAL_ID),
@@ -88,14 +87,14 @@ function enterSession($name, $globalSessionId): string
 function exitSession($authenticationId): string
 {
     fold($authenticationId);
-    $player = Player::getPlayerByAuthenticationId($authenticationId);
+    $player = Player::loadPlayerByAuthenticationId($authenticationId);
     $player->delete();
     return R_OK;
 }
 
 function startRound($authenticationId)
 {
-    $player = Player::getPlayerByAuthenticationId($authenticationId);
+    $player = Player::loadPlayerByAuthenticationId($authenticationId);
     if (!actionPerformable($player, Session::STATE_NOT_STARTED, Session::STATE_SHOWDOWN)) {
         return R_ERROR;
     }
@@ -117,7 +116,7 @@ function startRound($authenticationId)
 // Poker Actions
 function check($authenticationId): string
 {
-    $player = Player::getPlayerByAuthenticationId($authenticationId);
+    $player = Player::loadPlayerByAuthenticationId($authenticationId);
     if (!actionPerformable($player, Session::STATE_ROUND_BET_CHECK)) {
         return R_ERROR;
     }
@@ -135,7 +134,7 @@ function check($authenticationId): string
 
 function bet($authenticationId, $amount): string
 {
-    $player = Player::getPlayerByAuthenticationId($authenticationId);
+    $player = Player::loadPlayerByAuthenticationId($authenticationId);
     if (!actionPerformable($player, Session::STATE_ROUND_BET_CHECK)) {
         return R_ERROR;
     }
@@ -151,7 +150,7 @@ function bet($authenticationId, $amount): string
 
 function call($authenticationId): string
 {
-    $player = Player::getPlayerByAuthenticationId($authenticationId);
+    $player = Player::loadPlayerByAuthenticationId($authenticationId);
     if (!actionPerformable($player, Session::STATE_ROUND_RAISE_CALL)) {
         return R_ERROR;
     }
@@ -163,7 +162,7 @@ function call($authenticationId): string
 
 function raise($authenticationId, $amount): string
 {
-    $player = Player::getPlayerByAuthenticationId($authenticationId);
+    $player = Player::loadPlayerByAuthenticationId($authenticationId);
     if (!actionPerformable($player, Session::STATE_ROUND_RAISE_CALL)) {
         return R_ERROR;
     }
@@ -175,7 +174,7 @@ function raise($authenticationId, $amount): string
 
 function fold($authenticationId): string
 {
-    $player = Player::getPlayerByAuthenticationId($authenticationId);
+    $player = Player::loadPlayerByAuthenticationId($authenticationId);
     return R_OK;
 }
 
@@ -192,4 +191,8 @@ function actionPerformable(Player $player, ...$neededSessionStates)
     return true;
 }
 
-
+function checkOrCall($authenticationId)
+{
+    $player = Player::loadPlayerByAuthenticationId($authenticationId);
+//    $session = Session::lo
+}

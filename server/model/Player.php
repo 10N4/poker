@@ -7,17 +7,15 @@ namespace poker_model;
 class Player extends DBO
 {
     // region DB Fields
+    const AUTHENTICATION_ID = "authentication_id";
     const NAME              = "name";
     const SESSION_ID        = "session_id";
-    const IS_ACTIVE         = "is_active";
-    const IS_PAUSED         = "is_paused";
-    const AUTHENTICATION_ID = "authentication_id";
     const CARD1             = "card1";
     const CARD2             = "card2";
     const MONEY             = "money";
     const CURRENT_BET       = "current_bet";
     const TOTAL_BET         = "total_bet";
-    const IS_UPDATED        = "is_updated";
+    const IS_PAUSED         = "is_paused";
     const SET_ACTIVE_TIME   = "set_active_time";
     const LAST_UPDATE_TIME  = "last_update_time";
 
@@ -168,6 +166,9 @@ class Player extends DBO
 
     // endregion
 
+    /**
+     * Sets the bet of the player on the highest bet in the round
+     */
     public function equalizeBet()
     {
         $players = $this->getAllPlayers();
@@ -181,7 +182,10 @@ class Player extends DBO
         $this->setCurrentBet($maxBet);
     }
 
-
+    /**
+     * Returns true, if the player is the dealer, returns false otherwise
+     * @return bool
+     */
     public function isDealer()
     {
         $session = $this->getSession();
@@ -219,7 +223,10 @@ class Player extends DBO
         $nextPlayer->update();
     }
 
-    public static function setAllUnUpdated(): void
+    /**
+     * Sets the is_updated field of all players of the session false
+     */
+    public static function setAllUnUpdated($sessionId): void
     {
         /**
          * @param Player $player
@@ -227,47 +234,76 @@ class Player extends DBO
         $setUpdateFalse = function ($player) {
             $player->setUpdated(false);
         };
-        static::forEachInstance($setUpdateFalse);
+        /*$load = function() {
+            Player::load(self::SESSION_ID, $sessionId)
+        }
+        static::forEachInstance($setUpdateFalse, );*/
     }
 
-    public static function getPlayerByAuthenticationId($globalPlayerId): Player
+    /**
+     * Returns the player with the given authentication_id
+     * @param $globalPlayerId
+     * @return Player
+     */
+    public static function loadPlayerByAuthenticationId($globalPlayerId): Player
     {
         return Player::load(self::AUTHENTICATION_ID, $globalPlayerId)[0];
     }
 
+    /**
+     * Returns an array with all players of the session with the given id
+     * @param $sessionId
+     * @return array
+     */
     public static function getPlayersBySessionId($sessionId)
     {
         return Player::load(self::SESSION_ID, $sessionId);
     }
 
+    /**
+     * Returns an array with all players of the same session this player belongs to including this player
+     * @return array
+     */
     public function getAllPlayers()
     {
         return self::getPlayersBySessionId($this->getId());
     }
 
+    /**
+     * Returns an array with all players that are active session independently
+     * @return array
+     */
     public static function getActivePlayers()
     {
         return Player::load(Player::IS_ACTIVE, true);
     }
 
+    /**
+     * Returns the session of the player
+     * @return Session
+     */
     public function getSession(): Session
     {
         return Session::loadById($this->getSessionId());
     }
 
+    /**
+     * Returns the cards of the player
+     * @return array
+     */
     public function getCards()
     {
         return array($this->getCard1(), $this->getCard2());
     }
 
-
     /**
      * Initializes a new Player and returns it
+     * This function replaces the constructor
      * @param string $name
      * @param Session $session
      * @return Player
      */
-    public static function init($name, $session): Player
+    public static function init(string $name, Session $session): Player
     {
         $player = new Player();
 
@@ -281,7 +317,7 @@ class Player extends DBO
         $cookieIdExists = true;
         while ($cookieIdExists) {
             $cookieId = generateRandomString();
-            if (self::getPlayerByAuthenticationId($cookieId) == null) {
+            if (self::loadPlayerByAuthenticationId($cookieId) == null) {
                 $cookieIdExists = false;
             }
         }
@@ -300,7 +336,7 @@ class Player extends DBO
 
     protected static function getTable(): string
     {
-        return "poker_player";
+        return 'poker_player';
     }
 
     protected static function getColumns(): array

@@ -350,8 +350,7 @@ class Session extends DBO
 
     public static function getSessionByGlobalId($link): Session
     {
-        return new Session();
-        $session = Session::load(self::GLOBAL_ID, $link);
+        return Session::load(self::GLOBAL_ID, $link)[0];
     }
 
     /**
@@ -360,7 +359,7 @@ class Session extends DBO
      * @param int $startMoney
      * @return Session
      */
-    public static function init($name, $startMoney): Session
+    public static function init(string $name, int $startMoney): Session
     {
         /** @var Session $session */
         $session = new Session();

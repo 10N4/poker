@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-require_once "api-const.php";
+require_once "rest-const.php";
 require_once "action.php";
 
 $action = $_REQUEST[P_ACTION];
@@ -12,32 +12,22 @@ switch ($_SERVER["REQUEST_METHOD"]) {
     case "POST":
         post($action);
         break;
-    case "PUT":
-        put();
-        break;
-    case "DELETE":
-        delete();
-        break;
 }
 
 function get($action): void
 {
     if ($action == A_UPDATE) {
-        $playerId = $_GET[P_PLAYER_ID];
+        $playerId = $_COOKIE[P_AUTHENTICATION_ID];
         $result = getUpdate($playerId);
     } else {
         $result = R_ERROR;
     }
-    makeOutput($result);
+    echo $result;
 }
 
 function post($action): void
 {
     switch ($action) {
-        // General Actions
-        case A_VALIDATE:
-            validate();
-            break;
         case A_CREATE_SESSION:
             $playerName = $_POST[P_PLAYER_NAME];
             $sessionName = $_POST[P_SESSION_NAME];
@@ -45,47 +35,29 @@ function post($action): void
             $result = createSession($playerName, $sessionName, $startMoney);
             break;
         case A_ENTER_SESSION:
+            $playerName = $_POST[P_PLAYER_NAME];
             $globalSessionId = $_POST[P_GLOBAL_SESSION_ID];
-            $result = enterSession();
+            $result = enterSession($playerName, $globalSessionId);
             break;
         case A_EXIT_SESSION:
-            $result = exitSession();
+            $authenticationId = $_COOKIE[P_AUTHENTICATION_ID];
+            $result = exitSession($authenticationId);
             break;
-        // Poker Actions
-        case A_CHECK:
-            $result = check();
+        case A_CHECK_CALL:
+            $authenticationId = $_COOKIE[P_AUTHENTICATION_ID];
+            $result = checkOrCall($authenticationId);
             break;
-        case A_BET:
+        case A_BET_RAISE:
             $playerId = $_POST[P_PLAYER_ID];
-            $result = bet($playerId);
-            break;
-        case A_CALL:
-            $result = call();
-            break;
-        case A_RAISE:
-            $result = raise();
+            $result = betOrRaise($playerId);
             break;
         case A_FOLD:
             $result = fold();
             break;
         default:
             $result = R_ERROR;
+            break;
     }
 
-    makeOutput($result);
-}
-
-function put(): void
-{
-
-}
-
-function delete(): void
-{
-
-}
-
-function makeOutput($output)
-{
-    echo $output;
+    echo $result;
 }
