@@ -10,7 +10,6 @@ use poker_model\Player;
 
 function getUpdate($authenticationId): string
 {
-    /** @var Player $player */
     $player = Player::loadPlayerByAuthenticationId($authenticationId);
     if ($player->isUpdated()) {
         return R_EMPTY;
@@ -57,7 +56,6 @@ function getCards($authenticationId)
 
 function createSession($playerName, $sessionName, $startMoney): string
 {
-    /** @var Session $session */
     $session = Session::init($sessionName, $startMoney);
     $player = Player::init($playerName, $session);
     $session->insert();
@@ -195,4 +193,9 @@ function checkOrCall($authenticationId)
 {
     $player = Player::loadPlayerByAuthenticationId($authenticationId);
 //    $session = Session::lo
+}
+
+function betOrRaise($authenticationId)
+{
+
 }
