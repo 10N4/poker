@@ -1,7 +1,7 @@
 # Definition of REST API
 All requests are sent to `/server/controller/rest.php`.
 
-With every request, also the `authenticationID` is transmitted as a cookie.
+With every request, also the `authentication_id` is transmitted as a cookie.
 
 ## GET
 For `GET` requests, the server returns a JSON.
@@ -10,7 +10,7 @@ For `GET` requests, the server returns a JSON.
 ### Cards
 Client request:
 ```
-P_ACTION: A_UPDATE
+P_ACTION=A_CARDS
 ```
 
 
@@ -27,67 +27,77 @@ Server answer:
 ### Update
 Client request:
 ```
-P_ACTION: A_UPDATE
+P_ACTION=A_UPDATE
 ```
 
 
 Server answer:
 ```
 {
+  "pod": 5000,
+  "current_bet": 250,
   "roles": {
     "dealer": "35",
-    "smallBlind": "36",
-    "bigBlind": "42",
-    "activePlayer": "53"
+    "small_blind": "36",
+    "big_blind": "42",
+    "active_player": "53"
   },
   "players": [
     {
       "id": "33",
       "name": "Albert", 
       "money": 5050,
-      "setThisRound": 250
+      "last_action": "Fold",
+      "bet_raise_value": 0
     },
     {
       "id": "35",
       "name": "Berta", 
       "money": 3160,
-      "setThisRound": 250
+      "last_action": "Check",
+      "bet_raise_value": 0
     },
     {
       "id": "36",
       "name": "Caesar", 
       "money": 1590,
-      "setThisRound": 250
+      "last_action": "Bet",
+      "bet_raise_value": 150
     },
     {
       "id": "42",
       "name": "David", 
       "money": 2450,
-      "setThisRound": 250
+      "last_action": "Call",
+      "bet_raise_value": 150
     },
     {
       "id": "51",
       "name": "Eberhart", 
       "money": 3240,
-      "setThisRound": 150
+      "last_action": "Raise",
+      "bet_raise_value": 250
     },
     {
       "id": "53",
       "name": "Francois", 
       "money": 6110,
-      "setThisRound": 150
+      "last_action": "Fold",
+      "bet_raise_value": 0
     },
     {
       "id": "55",
       "name": "Günter", 
       "money": 4930,
-      "setThisRound": 150
+      "last_action": "",
+      "bet_raise_value": 0
     },
     {
       "id": "59",
       "name": "Heribert", 
       "money": 2770,
-      "setThisRound": 150
+      "last_action": "",
+      "bet_raise_value": 0
     }
   ],
   "card1": "QH",
@@ -111,8 +121,26 @@ R_OK, R_ERROR
 ```
 
 
+### Check if sessions exists
+Client request:
+```
+P_ACTION=A_SESSION_EXISTS
+```
+
+
+Server answer:
+```
+{
+  "A_SESSION_EXISTS": true/false
+}
+```
+
+
+
 
 ## POST
+For `POST` requests, the server returns plain text.
+
 
 
 ### Join session
@@ -141,10 +169,10 @@ R_OK, R_ERROR
 ```
 
 
-### Checken
+### Checken/Call
 Client request:
 ```
-P_ACTION=A_CHECK
+P_ACTION=A_CHECK_CALL
 ```
 
 
@@ -154,36 +182,10 @@ R_OK, R_ERROR
 ```
 
 
-### Bet
+### Bet/Raise
 Client request:
 ```
-P_ACTION=A_BET&BET_VALUE=bet_value
-```
-
-
-Server answer:
-```
-R_OK, R_ERROR
-```
-
-
-### Call
-Client request:
-```
-P_ACTION=A_CALL
-```
-
-
-Server answer:
-```
-R_OK, R_ERROR
-```
-
-
-### Raise
-Client request:
-```
-P_ACTION=A_RAISE&RAISE_VALUE=raise_value
+P_ACTION=A_BET_RAISE&P_BET_RAISE_VALUE=bet_value
 ```
 
 
