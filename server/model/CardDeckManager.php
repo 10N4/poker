@@ -11,53 +11,55 @@ class CardDeckManager
 
     /**
      * CardDeck constructor.
+     * @param array $usedCards
      */
-    public function __construct()
+    public function __construct($usedCards = array())
     {
-        for ($i = 2; $i <= 14; $i++) {
+        for ($number = 2; $number <= 14; $number++) {
             foreach (Card::getAllColors() as $color) {
-                $this->allCards[] = new Card($i, $color);
+                $card = new Card($number, $color);
+                if (array_search($card, $usedCards)) {
+                    continue;
+                }
+                $this->allCards[] = $card;
             }
         }
     }
 
-    public function getRandomCardsBySession($sessionId, $number)
+    /*public function getRandomCardsBySession($sessionId, $number)
     {
-        return $this->getRandomCards($number);
-        /** @var Session $session */
-        $session = Session::loadById($sessionId);
-        /** @var Player $players */
-        $players = Player::load(Player::SESSION_ID, $sessionId);
+        $session = Session::getById($sessionId);
+        $players = Player::get(Player::SESSION_ID, $sessionId);
 
         $usedCards = array_merge($session->getCards(), $players->getCards());
 
         return $this->getRandomCards($number, $usedCards);
-    }
+    }*/
 
-    public function getRandomCard($usedCards = array()): Card
+    public function getRandomCard(): Card
     {
-        return $this->getRandomCards(1, $usedCards)[0];
+        return $this->getRandomCards(1)[0];
     }
 
-    public function getRandomCards($number, $usedCards = array())
+    public function getRandomCards($number)
     {
         $reducedCards = $this->allCards;
-        foreach ($usedCards as $usedCard) {
+        /*foreach ($usedCards as $usedCard) {
             $key = array_search($usedCard, $reducedCards);
             if ($key === false) {
                 dieFatalError("bede4afb-e006-442e-aaf8-4a5fd658535c");
             }
-            $reducedCards = arrayDeleteElement($reducedCards, $key);
-        }
+            $reducedCards = arrayDeleteElementByKey($reducedCards, $key);
+        }*/
         $resultCards = array();
         for ($i = 0; $i < $number; $i++) {
-            $cardNum = count($reducedCards);
+            $cardNum = count($this->allCards);
             if ($cardNum == 0) {
                 return $resultCards;
             }
             $cardIndex = rand(0, $cardNum - 1);
-            $resultCards[] = $reducedCards[$cardIndex];
-            $reducedCards = arrayDeleteElement($reducedCards, $cardIndex);
+            $resultCards[] = $this->allCards[$cardIndex];
+            $this->allCards = arrayDeleteElementByKey($this->allCards, $cardIndex);
         }
 
         return $resultCards;

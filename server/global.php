@@ -1,5 +1,5 @@
 <?php
-function pdo()
+function pdo(): PDO
 {
     // LIVE
     /*$host = "";
@@ -16,22 +16,11 @@ function pdo()
     return new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
 }
 
-function dieFatalError($code)
+function generateUniqueString($length = 64)
 {
-    if (DEBUG) {
-        die("Schwerwiegender Fehler, der die Sicherheit und Stabilität des Systems betrifft! Code: " . $code);
-    } else {
-        die();
+    if ($length < 64) {
+        $length = 64;
     }
-}
-
-function dieSqlError($code)
-{
-    die("SQL-Fehler! Code: " . $code);
-}
-
-function generateRandomString($length = 32)
-{
     $chars = 'abcdefghijklmnopqrstuvwxyz1234567890';
     $charCount = strlen($chars);
     $result = '';
@@ -41,14 +30,54 @@ function generateRandomString($length = 32)
     return $result;
 }
 
-function arrayDeleteElement($array, $deleteKey)
+/** @noinspection DuplicatedCode */
+function arrayDeleteElementByKey($array, $deleteKey)
 {
     $resultArray = array();
+    $shift = 0;
     foreach ($array as $key => $value) {
         if ($deleteKey == $key) {
+            $shift++;
             continue;
         }
-        $resultArray[] = $value;
+        if (preg_match("/^\d+$/", $key)) {
+            $resultArray[$key - $shift] = $value;
+        } else {
+            $resultArray[$key] = $value;
+        }
     }
     return $resultArray;
+}
+
+/** @noinspection DuplicatedCode */
+function arrayDeleteElementsByValue($array, $deleteValue)
+{
+    $resultArray = array();
+    $shift = 0;
+    foreach ($array as $key => $value) {
+        if ($value == $deleteValue) {
+            $shift++;
+            continue;
+        }
+        if (preg_match("/^\d+$/", $key)) {
+            $resultArray[$key - $shift] = $value;
+        } else {
+            $resultArray[$key] = $value;
+        }
+    }
+}
+
+
+// DEBUG
+function println($output)
+{
+    echo $output;
+    echo "\n";
+}
+
+/** @noinspection SpellCheckingInspection */
+function dumbln($output)
+{
+    var_dump($output);
+    echo "\n";
 }

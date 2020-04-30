@@ -16,11 +16,21 @@ switch ($_SERVER["REQUEST_METHOD"]) {
 
 function get($action): void
 {
-    if ($action == A_UPDATE) {
-        $playerId = $_COOKIE[P_AUTHENTICATION_ID];
-        $result = getUpdate($playerId);
-    } else {
-        $result = R_ERROR;
+    switch ($action) {
+        case A_UPDATE:
+            $authenticationId = $_COOKIE[P_AUTHENTICATION_ID];
+            $result = getUpdate($authenticationId);
+            break;
+        case A_CARDS:
+            $authenticationId = $_COOKIE[P_AUTHENTICATION_ID];
+            $result = getCards($authenticationId);
+            break;
+        case A_SESSION_EXISTS:
+            $globalSessionId = $_POST[P_GLOBAL_SESSION_ID];
+            $result = isSessionExisting($globalSessionId);
+            break;
+        default:
+            $result = R_ERROR;
     }
     echo $result;
 }

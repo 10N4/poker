@@ -6,22 +6,55 @@ namespace poker_model;
 
 class Player extends DBO
 {
+    const STATE_LOBBY = 0;
+    const STATE_WATCHING = 1;
+    const STATE_AT_THE_TABLE = 2;
+    const STATE_IN_GAME_INACTIVE = 3;
+    const STATE_IN_GAME_ACTIVE = 4;
+
+    const ROLE_DEALER = 0;
+    const ROLE_SMALL_BLIND = 1;
+    const ROLE_BIG_BLIND = 2;
+
+    const ACTION_ENTER = 0;
+    const ACTION_PAUSE = 1;
+    const ACTION_EXIT = 2;
+    const ACTION_CHECK = 3;
+    const ACTION_BET = 4;
+    const ACTION_CALL = 5;
+    const ACTION_RAISE = 6;
+    const ACTION_FOLD = 7;
+
     // region DB Fields
     const AUTHENTICATION_ID = "authentication_id";
-    const NAME              = "name";
-    const SESSION_ID        = "session_id";
-    const CARD1             = "card1";
-    const CARD2             = "card2";
-    const MONEY             = "money";
-    const CURRENT_BET       = "current_bet";
-    const TOTAL_BET         = "total_bet";
-    const IS_PAUSED         = "is_paused";
-    const SET_ACTIVE_TIME   = "set_active_time";
-    const LAST_UPDATE_TIME  = "last_update_time";
+    const NAME = "name";
+    const SESSION_ID = "session_id";
+    const CARD1 = "card1";
+    const CARD2 = "card2";
+    const MONEY = "money";
+    const CURRENT_BET = "current_bet";
+    const TOTAL_BET = "total_bet";
+    const STATE = "state";
+    const IS_UPDATED = "is_updated";
+    const LAST_UPDATE_TIME = "last_update_time";
+    const ACTIVE_TIME = "active_time";
+    const LAST_ACTION = "last_action";
+
+    private $session = 0;
 
     // endregion
 
     //region getter and setter
+
+    public function getAuthenticationId()
+    {
+        return $this->getValue(self::AUTHENTICATION_ID);
+    }
+
+    private function setAuthenticationId($authenticationId)
+    {
+        $this->setValue(self::AUTHENTICATION_ID, $authenticationId);
+    }
 
     public function getName()
     {
@@ -35,42 +68,12 @@ class Player extends DBO
 
     public function getSessionId()
     {
-        return $this->getValue(self::NAME);
+        return $this->getValue(self::SESSION_ID);
     }
 
     private function setSessionId($sessionId)
     {
         $this->setValue(self::SESSION_ID, $sessionId);
-    }
-
-    public function isActive()
-    {
-        return $this->getValue(self::IS_ACTIVE);
-    }
-
-    public function setActive($flag)
-    {
-        $this->setValue(self::IS_ACTIVE, $flag);
-    }
-
-    public function isPaused()
-    {
-        return $this->getValue(self::IS_PAUSED);
-    }
-
-    public function setPaused($flag)
-    {
-        $this->setValue(self::IS_PAUSED, $flag);
-    }
-
-    public function getAuthenticationId()
-    {
-        return $this->getValue(self::AUTHENTICATION_ID);
-    }
-
-    private function setAuthenticationId($authenticationId)
-    {
-        $this->setValue(self::AUTHENTICATION_ID, $authenticationId);
     }
 
     public function getCard1()
@@ -123,15 +126,14 @@ class Player extends DBO
         $this->setValue(self::TOTAL_BET, $totalBet);
     }
 
-    public function raiseBet($amount)
+    public function getState()
     {
-        $this->setCurrentBet($this->getCurrentBet() + $amount);
-        $this->setTotalBet($this->getTotalBet() + $amount);
+        return $this->getValue(self::STATE);
     }
 
-    public function clearCurrentBet()
+    public function setState($flag)
     {
-        $this->setCurrentBet(0);
+        $this->setValue(self::STATE, $flag);
     }
 
     public function isUpdated()
@@ -156,30 +158,53 @@ class Player extends DBO
 
     public function getSetActiveTime()
     {
-        return $this->getValue(self::SET_ACTIVE_TIME);
+        return $this->getValue(self::ACTIVE_TIME);
     }
 
-    public function setSetActiveTime(int $time)
+    private function setActiveTime(int $time)
     {
-        $this->setValue(self::SET_ACTIVE_TIME, $time);
+        $this->setValue(self::ACTIVE_TIME, $time);
+    }
+
+    public function getLastAction()
+    {
+        return $this->getValue(self::LAST_ACTION);
+    }
+
+    public function setLastAction($lastAction)
+    {
+        $this->setValue(self::LAST_ACTION, $lastAction);
     }
 
     // endregion
+
+    public function hasState($state)
+    {
+        return $this->getState() == $state;
+    }
+
+    public function raiseBet($amount)
+    {
+        $this->setMoney($this->getMoney() - $amount);
+        $this->setCurrentBet($this->getCurrentBet() + $amount);
+        $this->setTotalBet($this->getTotalBet() + $amount);
+        $session = $this->getSession();
+        $session->setPlayerLastRaisedId($this->getId());
+        $session->update();
+    }
+
+    public function clearCurrentBet()
+    {
+        $this->setCurrentBet(0);
+    }
 
     /**
      * Sets the bet of the player on the highest bet in the round
      */
     public function equalizeBet()
     {
-        $players = $this->getAllPlayers();
-        $maxBet = 0;
-        /** @var Player $player */
-        foreach ($players as $player) {
-            if ($player->getCurrentBet() > $maxBet) {
-                $maxBet = $player->getCurrentBet();
-            }
-        }
-        $this->setCurrentBet($maxBet);
+        $amount = $this->getHighestBet() - $this->getCurrentBet();
+        $this->raiseBet($amount);
     }
 
     /**
@@ -189,7 +214,7 @@ class Player extends DBO
     public function isDealer()
     {
         $session = $this->getSession();
-        $dealerId = $session->getDealer();
+        $dealerId = $session->getDealerId();
         return $this->getId() == $dealerId;
     }
 
@@ -198,29 +223,39 @@ class Player extends DBO
      * If this player has the highest id in the session, the next active player is the one with the lowest.
      * The method assumes the sessions state is a 'round-sate' and this player is the active one actually.
      */
-    public function setNextPlayerActive() {
-        $players = $this->getAllPlayers();
+    public function setNextPlayerActive()
+    {
+        $this->setInActive();
+        $nextPlayer = $this->getNextPlayer();
+        $nextPlayer->setActive();
+        $nextPlayer->update();
+    }
+
+    public function getNextPlayer(): Player
+    {
+        $session = $this->getSession();
+        $players = $session->getPlayersInGame();
         $lastPlayersIndex = count($players) - 1;
         if ($lastPlayersIndex < 1) {
-            return;
+            dieFatalError('35038c0c-5edc-4786-8487-b8938aecd6d2');
         }
-        $nextPlayerId = 0;
-        for ($i = 0; $i <= $lastPlayersIndex; $i++) {
+
+        $nextPlayerIndex = 0;
+        for ($i = 0; $i < $lastPlayersIndex; $i++) {
             if ($players[$i]->getId() != $this->getId()) {
                 continue;
             }
-            if ($i == $lastPlayersIndex) {
-                $nextPlayerId = $players[0]->getId();
-            } else {
-                $nextPlayerId = $i;
-            }
+            $nextPlayerIndex = $i + 1;
             break;
         }
-        $this->setActive(false);
-        /** @var Player $nextPlayer */
-        $nextPlayer = Player::loadById($nextPlayerId);
-        $nextPlayer->setActive(true);
-        $nextPlayer->update();
+        return $players[$nextPlayerIndex];
+    }
+
+    public function setCards(CardDeckManager $cardDeckManager)
+    {
+        $cards = $cardDeckManager->getRandomCards(2);
+        $this->setCard1($cards[0]->__toString());
+        $this->setCard2($cards[1]->__toString());
     }
 
     /**
@@ -243,11 +278,15 @@ class Player extends DBO
     /**
      * Returns the player with the given authentication_id
      * @param $globalPlayerId
-     * @return Player
+     * @return Player|bool
      */
-    public static function loadPlayerByAuthenticationId($globalPlayerId): Player
+    public static function getPlayerByAuthenticationId($globalPlayerId)
     {
-        return Player::load(self::AUTHENTICATION_ID, $globalPlayerId)[0];
+        $player = Player::get(self::AUTHENTICATION_ID, $globalPlayerId);
+        if (!empty($player)) {
+            return $player[0];
+        }
+        return false;
     }
 
     /**
@@ -257,7 +296,7 @@ class Player extends DBO
      */
     public static function getPlayersBySessionId($sessionId)
     {
-        return Player::load(self::SESSION_ID, $sessionId);
+        return Player::get(self::SESSION_ID, $sessionId);
     }
 
     /**
@@ -266,7 +305,7 @@ class Player extends DBO
      */
     public function getAllPlayers()
     {
-        return self::getPlayersBySessionId($this->getId());
+        return self::getPlayersBySessionId($this->getSessionId());
     }
 
     /**
@@ -275,7 +314,7 @@ class Player extends DBO
      */
     public static function getActivePlayers()
     {
-        return Player::load(Player::IS_ACTIVE, true);
+        return Player::get(Player::STATE, self::STATE_IN_GAME_ACTIVE);
     }
 
     /**
@@ -284,7 +323,7 @@ class Player extends DBO
      */
     public function getSession(): Session
     {
-        return Session::loadById($this->getSessionId());
+        return Session::getById($this->getSessionId());
     }
 
     /**
@@ -295,6 +334,33 @@ class Player extends DBO
     {
         return array($this->getCard1(), $this->getCard2());
     }
+
+    public function getHighestBet()
+    {
+        $players = $this->getAllPlayers();
+        $maxBet = 0;
+        /** @var Player $player */
+        foreach ($players as $player) {
+            if ($player->getCurrentBet() > $maxBet) {
+                $maxBet = $player->getCurrentBet();
+            }
+        }
+        return $maxBet;
+    }
+
+    public function setActive()
+    {
+        $this->setState(self::STATE_IN_GAME_ACTIVE);
+        $this->setActiveTime(time());
+    }
+
+    public function setInActive()
+    {
+        $this->setState(self::STATE_IN_GAME_INACTIVE);
+        $this->setActiveTime(0);
+    }
+
+    // region base
 
     /**
      * Initializes a new Player and returns it
@@ -307,54 +373,55 @@ class Player extends DBO
     {
         $player = new Player();
 
+        $player->setAuthenticationId(generateUniqueString());
         $player->setName($name);
-
         $player->setSessionId($session->getId());
-        $player->setActive(false);
-        $player->setPaused(false);
-
-        $cookieId = '';
-        $cookieIdExists = true;
-        while ($cookieIdExists) {
-            $cookieId = generateRandomString();
-            if (self::loadPlayerByAuthenticationId($cookieId) == null) {
-                $cookieIdExists = false;
-            }
-        }
-        $player->setAuthenticationId($cookieId);
-        $deck = new CardDeckManager();
-        $cards = $deck->getRandomCardsBySession($player->getSessionId(), 2);
-        $player->setCard1($cards[0]);
-        $player->setCard2($cards[1]);
+        $player->setCard1(Card::REP_NO_CARD);
+        $player->setCard2(Card::REP_NO_CARD);
         $player->setMoney($session->getStartMoney());
         $player->setCurrentBet(0);
         $player->setTotalBet(0);
+        $player->setState(self::STATE_AT_THE_TABLE);
         $player->setUpdated(false);
+        $player->setLastUpdateTime(0);
+        $player->setActiveTime(0);
+        $player->setLastAction(self::ACTION_ENTER);
 
         return $player;
     }
 
     protected static function getTable(): string
     {
-        return 'poker_player';
+        return 'players';
     }
 
     protected static function getColumns(): array
     {
         return array(
+            self::AUTHENTICATION_ID,
             self::NAME,
             self::SESSION_ID,
-            self::IS_ACTIVE,
-            self::IS_PAUSED,
-            self::AUTHENTICATION_ID,
             self::CARD1,
             self::CARD2,
             self::MONEY,
             self::CURRENT_BET,
             self::TOTAL_BET,
+            self::STATE,
             self::IS_UPDATED,
-            self::SET_ACTIVE_TIME,
             self::LAST_UPDATE_TIME,
+            self::ACTIVE_TIME,
+            self::LAST_ACTION,
         );
     }
+
+    public static function getById($id): Player
+    {
+        return parent::getById($id);
+    }
+
+    public function __construct()
+    {
+    }
+
+    // endregion
 }

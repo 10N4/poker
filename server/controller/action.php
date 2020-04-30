@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 
+require_once "server/variables.php";
 require_once "rest-const.php";
 require_once "server/model/Session.php";
 require_once "server/model/Player.php";
@@ -10,20 +11,55 @@ use poker_model\Player;
 
 function getUpdate($authenticationId): string
 {
-    $player = Player::loadPlayerByAuthenticationId($authenticationId);
+    $player = Player::getPlayerByAuthenticationId($authenticationId);
     if ($player->isUpdated()) {
-        return R_EMPTY;
-    } else {
-        // TODO: return json
+        return R_UPDATED;
     }
 
-    return R_OK;
+    $session = $player->getSession();
+    $roles = $session->getRoles();
+
+    /*$dealerId = $session->getDealer();
+    $dealer = Player::getById($dealerId);
+    $smallBlind = $dealer->getNextPlayer();
+    $bigBlind = $smallBlind->getNextPlayer();*/
+
+    $players = $player->getAllPlayers();
+    $playersEncoded = array();
+    /** @var Player $item */
+    foreach ($players as $item) {
+        $playersEncoded[] = $item->toJson(Player::ID,
+            Player::NAME,
+            Player::MONEY,
+            Player::LAST_ACTION,
+            Player::STATE,
+            Player::CURRENT_BET);
+    }
+
+    $result = array(
+        POD => $session->getPod(),
+        CURRENT_BET => $player->getHighestBet(),
+        ROLES => array(
+            DEALER => $roles[Player::ROLE_DEALER]->getId(),
+            SMALL_BLIND => $roles[Player::ROLE_SMALL_BLIND]->getId(),
+            BIG_BLIND => $roles[Player::ROLE_BIG_BLIND]->getId()
+        ),
+        CARDS => $session->getCards(),
+        PLAYERS => $playersEncoded,
+    );
+    return json_encode($result);
 }
 
 function getCards($authenticationId)
 {
-    $player = Player::loadPlayerByAuthenticationId($authenticationId);
+    $player = Player::getPlayerByAuthenticationId($authenticationId);
     return $player->toJson(Player::CARD1, Player::CARD2);
+}
+
+function isSessionExisting($globalSessionId)
+{
+    $session = Session::getSessionByGlobalId($globalSessionId);
+    return json_encode([A_SESSION_EXISTS => ($session != null)]);
 }
 
 /*function validate()
@@ -57,8 +93,8 @@ function getCards($authenticationId)
 function createSession($playerName, $sessionName, $startMoney): string
 {
     $session = Session::init($sessionName, $startMoney);
-    $player = Player::init($playerName, $session);
     $session->insert();
+    $player = Player::init($playerName, $session);
     $player->insert();
     return json_encode(array(
         PLAYER => $player->toJson(Player::AUTHENTICATION_ID, Player::NAME),
@@ -70,10 +106,13 @@ function createSession($playerName, $sessionName, $startMoney): string
 function enterSession($playerName, $globalSessionId): string
 {
     $session = Session::getSessionByGlobalId($globalSessionId);
+    if (!$session) {
+        return R_NO_SUCH_SESSION;
+    }
     if ($session->isFull()) {
         return R_SESSION_FULL;
     }
-    $player = Player::init($playerName, $globalSessionId);
+    $player = Player::init($playerName, $session);
     $player->insert();
     return json_encode(array(
         PLAYER => $player->toJson(Player::AUTHENTICATION_ID, Player::NAME),
@@ -84,118 +123,198 @@ function enterSession($playerName, $globalSessionId): string
 
 function exitSession($authenticationId): string
 {
-    fold($authenticationId);
-    $player = Player::loadPlayerByAuthenticationId($authenticationId);
+    $player = Player::getPlayerByAuthenticationId($authenticationId);
+    if (!$player) {
+        return R_ERROR;
+    }
+    fold($authenticationId, $player);
     $player->delete();
     return R_OK;
 }
 
-function startRound($authenticationId)
+function pause($authenticationId): string
 {
-    $player = Player::loadPlayerByAuthenticationId($authenticationId);
-    if (!actionPerformable($player, Session::STATE_NOT_STARTED, Session::STATE_SHOWDOWN)) {
+    $player = Player::getPlayerByAuthenticationId($authenticationId);
+    if (!$player) {
+        return R_ERROR;
+    }
+    fold($authenticationId, $player);
+    $player->setState(Player::STATE_WATCHING);
+    return R_OK;
+}
+
+function startRound($authenticationId): string
+{
+    $player = Player::getPlayerByAuthenticationId($authenticationId);
+    if (!$player) {
         return R_ERROR;
     }
     $session = $player->getSession();
+    /*if (!actionPerformable($player, $session, Session::STATE_NOT_STARTED, Session::STATE_SHOWDOWN)) {
+        return R_ERROR;
+    }*/
     if (!$session->hasEnoughPlayers()) {
         return R_ERROR;
     }
 
-    $player->setActive(false);
+    $player->setState(Player::STATE_IN_GAME_INACTIVE);
+    $player->update();
 
     // Start next round if the the first game has not started yet or if everyone performed this action
     if ($session->getState() == Session::STATE_NOT_STARTED || !count(Player::getActivePlayers())) {
         $session->setNextRound();
+        $session->update();
         return R_NEXT_ROUND;
     }
     return R_WAIT;
 }
 
 // Poker Actions
-function check($authenticationId): string
+function checkOrCall($authenticationId)
 {
-    $player = Player::loadPlayerByAuthenticationId($authenticationId);
-    if (!actionPerformable($player, Session::STATE_ROUND_BET_CHECK)) {
+    $player = Player::getPlayerByAuthenticationId($authenticationId);
+    if (!$player->hasState(Player::STATE_IN_GAME_ACTIVE)) {
         return R_ERROR;
     }
+    $session = $player->getSession();
+    switch ($session->getState()) {
+        case Session::STATE_BET_CHECK:
+            $result = check($player, $session);
+            break;
+        case Session::STATE_RAISE_CALL:
+            $result = call($player, $session);
+            break;
+        default:
+            $result = R_ERROR;
+
+    }
+    // Updates are done in called functions
+    return $result;
+}
+
+function betOrRaise($authenticationId, $amount)
+{
+    $player = Player::getPlayerByAuthenticationId($authenticationId);
+    if (!$player->hasState(Player::STATE_IN_GAME_ACTIVE)) {
+        return R_ERROR;
+    }
+    $session = $player->getSession();
+    switch ($session->getState()) {
+        case Session::STATE_BET_CHECK:
+            $result = bet($player, $session, $amount);
+            break;
+        case Session::STATE_RAISE_CALL:
+            $result = raise($player, $session, $amount);
+            break;
+        default:
+            $result = R_ERROR;
+
+    }
+    // Updates are done in called functions
+    return $result;
+}
+
+function fold($authenticationId, $player = false): string
+{
+    if (!$player) {
+        $player = Player::getPlayerByAuthenticationId($authenticationId);
+        if (!$player) {
+            return R_ERROR;
+        }
+    }
+    $playerState = $player->getState();
+    if ($playerState == Player::STATE_IN_GAME_INACTIVE || $playerState == Player::STATE_IN_GAME_ACTIVE) {
+        $player->setState(Player::STATE_AT_THE_TABLE);
+    }
+    return R_OK;
+}
+
+// Helper Actions
+function check(Player $player, Session $session): string
+{
     // The dealer is the last one playing in a round. If the dealer checks all the others have already checked.
     if ($player->isDealer()) {
-        $session = $player->getSession();
         $session->setNextRound();
         $session->update();
     } else {
         $player->setNextPlayerActive();
+        $player->update();
     }
-    $player->update();
+
     return R_OK;
 }
 
-function bet($authenticationId, $amount): string
+function bet(Player $player, Session $session, $amount): string
 {
-    $player = Player::loadPlayerByAuthenticationId($authenticationId);
-    if (!actionPerformable($player, Session::STATE_ROUND_BET_CHECK)) {
-        return R_ERROR;
-    }
-    $session = $player->getSession();
     $player->raiseBet($amount);
-    $session->setState(Session::STATE_ROUND_RAISE_CALL);
+    $session->setState(Session::STATE_RAISE_CALL);
     $player->setNextPlayerActive();
-
-    $player->update();
     $session->update();
-    return R_OK;
-}
-
-function call($authenticationId): string
-{
-    $player = Player::loadPlayerByAuthenticationId($authenticationId);
-    if (!actionPerformable($player, Session::STATE_ROUND_RAISE_CALL)) {
-        return R_ERROR;
-    }
-    $player->equalizeBet();
-    $player->setNextPlayerActive();
     $player->update();
+
     return R_OK;
 }
 
-function raise($authenticationId, $amount): string
+function call(Player $player, Session $session): string
 {
-    $player = Player::loadPlayerByAuthenticationId($authenticationId);
-    if (!actionPerformable($player, Session::STATE_ROUND_RAISE_CALL)) {
-        return R_ERROR;
+    $player->equalizeBet();
+    $player->update();
+    if ($session->areAllBetsEqual()) {
+        $session->setNextRound();
+        $session->update();
+    } else {
+        $player->setNextPlayerActive();
+        $player->update();
     }
+    return R_OK;
+}
+
+/** @noinspection PhpUnusedParameterInspection */
+function raise(Player $player, Session $session, $amount): string
+{
+    $player->equalizeBet();
     $player->raiseBet($amount);
     $player->setNextPlayerActive();
     $player->update();
-    return R_OK;
-}
-
-function fold($authenticationId): string
-{
-    $player = Player::loadPlayerByAuthenticationId($authenticationId);
     return R_OK;
 }
 
 // Helper
-function actionPerformable(Player $player, ...$neededSessionStates)
+function actionPerformable(Player $player, Session $session, ...$neededSessionStates)
 {
-    if (!$player->isActive()) {
+    if (!$player->hasState(Player::STATE_IN_GAME_ACTIVE)) {
         return false;
     }
-    $session = $player->getSession();
     if (!in_array($session->getState(), $neededSessionStates)) {
         return false;
     }
     return true;
 }
 
-function checkOrCall($authenticationId)
+function evaluate()
 {
-    $player = Player::loadPlayerByAuthenticationId($authenticationId);
-//    $session = Session::lo
+    // Check highest set
+    // Check who has to show the cards
+
+    return json_encode();
 }
 
-function betOrRaise($authenticationId)
+function dieFatalError($code)
 {
+    if (DEBUG) {
+        die("Schwerwiegender Fehler, der die Sicherheit und Stabilität des Systems betrifft! Code: " . $code);
+    } else {
+        die();
+    }
+}
 
+function dieSqlError($code, $infos = array())
+{
+    if (DEBUG) {
+        println("SQL-Fehler! Code: " . $code);
+        foreach ($infos as $info) {
+            println($info);
+        }
+    }
+    die();
 }

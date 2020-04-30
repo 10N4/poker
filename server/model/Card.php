@@ -20,6 +20,8 @@ class Card
     public const NUM_KING = 13;
     public const NUM_ACE = 14;
 
+    public const REP_NO_CARD = 0;
+
     private $number;
     private $color;
 
@@ -80,17 +82,17 @@ class Card
     public static function parse(string $rep): Card
     {
         $colors = implode('', self::getAllColors());
-        if (preg_match("/^[$colors],[2-9]|(1[0-4])$/", $rep)) {
-            list($color, $number) = explode(',', $rep);
+        if (preg_match("/^[$colors][2-9]|(1[0-4])$/", $rep)) {
+            $color = $rep[0];
+            $number = substr($rep, 1, strlen($rep));
             return new Card($number, $color);
         }
 
-        /** @noinspection PhpUnhandledExceptionInspection */
         throw new ParseException();
     }
 
     public function __toString()
     {
-        return $this->getColor() . ',' . $this->getNumber();
+        return $this->getColor() . $this->getNumber();
     }
 }

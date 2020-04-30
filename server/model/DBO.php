@@ -2,6 +2,7 @@
 
 namespace poker_model;
 
+use PDO;
 use PDOStatement;
 
 require_once "server/global.php";
@@ -13,18 +14,17 @@ require_once "server/global.php";
 abstract class DBO
 {
     const ID = 'id';
-    const defaultId = 0;
+    const ID_NOT_CREATED = 0;
 
-    private $id = self::defaultId;
+    private $id = self::ID_NOT_CREATED;
     private $values = array();
+    private $pseudoValues = array();
 
     /**
      * Prevents the use of a constructor with parameters in subclasses. Use an init function instead.
      * DBO constructor.
      */
-    public function __construct()
-    {
-    }
+    public abstract function __construct();
 
     // region getter and setter
 
@@ -35,7 +35,7 @@ abstract class DBO
 
     public function isInserted(): bool
     {
-        return $this->id != self::defaultId;
+        return $this->id != self::ID_NOT_CREATED;
     }
 
     protected function getValue($field)
@@ -60,9 +60,13 @@ abstract class DBO
      * @param $id
      * @return mixed
      */
-    public static function loadById($id)
+    public static function getById($id)
     {
-        return self::load(self::ID, $id)[0];
+        $result = static::get(self::ID, $id);
+        if (!empty($result)) {
+            return $result[0];
+        }
+        return false;
     }
 
     /**
@@ -72,9 +76,9 @@ abstract class DBO
      * @param array $options
      * @return array
      */
-    public static function load($field, $value, $options = array()): array
+    public static function get($field, $value, $options = array()): array
     {
-        if (!static::escapteField($field)) {
+        if (!static::escapeField($field)) {
             dieFatalError('4ada65f9-0953-4467-a361-0f4e4ceea869');
         }
         $table = static::getTable();
@@ -82,12 +86,14 @@ abstract class DBO
         $stmt = pdo()->prepare($sql);
         $stmt->bindValue(':value', $value);
         $stmt->execute();
-        $result = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         $objectArray = array();
+
         foreach ($result as $entry) {
             $object = new static();
-            $object->values = $entry;
+            $object->id = $entry[self::ID];
+            $object->values = arrayDeleteElementByKey($entry, self::ID);
             $objectArray[] = $object;
         }
 
@@ -110,10 +116,10 @@ abstract class DBO
         $sql = "INSERT INTO {$table} ({$columnString}) VALUES ({$paramString})";
         $stmt = pdo()->prepare($sql);
         $stmt = $this->getStmtBind($stmt);
-        $stmt->execute() or dieSqlError("8e4f141a-9cf2-4d4c-8def-e916964680c8");
+        $stmt->execute() or dieSqlError("8e4f141a-9cf2-4d4c-8def-e916964680c8", $stmt->errorInfo());
 
         $sql = "SELECT MAX(" . self::ID . ") as max_id FROM {$table} LIMIT 1";
-        $result = pdo()->query($sql)->fetch(\PDO::FETCH_ASSOC);
+        $result = pdo()->query($sql)->fetch(PDO::FETCH_ASSOC);
 
         $this->id = $result["max_id"];
     }
@@ -142,10 +148,21 @@ abstract class DBO
         $sql = "DELETE FROM {$table} WHERE {$id} = {$this->getId()}";
         pdo()->query($sql) or dieSqlError('e70e2c41-689b-4763-9841-87f4d5cf6676');
 
-        $this->id = self::defaultId;
+        $this->id = self::ID_NOT_CREATED;
     }
 
     // endregion
+
+    public static function truncate(): void
+    {
+        if (!DEBUG) {
+            dieFatalError('b6a9f7eb-ceb3-415c-94fd-428f45a6f84f');
+            die();
+        }
+        $table = static::getTable();
+        $sql = "TRUNCATE TABLE $table";
+        pdo()->query($sql);
+    }
 
     // region tools
 
@@ -179,16 +196,22 @@ abstract class DBO
      */
     public function toJson(...$fields)
     {
+        $allValues = array_merge($this->values, $this->pseudoValues);
         if (count($fields) == 0) {
-            return json_encode($this->values);
+            return json_encode($allValues);
         }
         $encodeValues = array();
-        foreach ($this->values as $key => $value) {
+        foreach ($allValues as $key => $value) {
             if (in_array($key, $fields)) {
                 $encodeValues[$key] = $value;
             }
         }
         return json_encode($encodeValues);
+    }
+
+    public function setPseudoValue($field, $value)
+    {
+        $this->pseudoValues[$field] = $value;
     }
 
     // endregion
@@ -216,7 +239,7 @@ abstract class DBO
         return $stmt;
     }
 
-    private static function escapteField($field)
+    private static function escapeField($field)
     {
         if ($field === static::ID || in_array($field, static::getColumns())) {
             return true;
@@ -228,7 +251,7 @@ abstract class DBO
     {
         $result = '';
         foreach ($this->values as $key => $value) {
-            $result .= $key . ' = ' . ':' . $value . ', ';
+            $result .= "$key = :$key,";
         }
         return substr($result, 0, strlen($result) - 1);
     }
