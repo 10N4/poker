@@ -111,13 +111,17 @@ Server answer:
 ### Create Session
 Client request:
 ```
-P_ACTION=A_ENTER_SESSION&P_SESSION_NAME=session_name&P_PLAYER_NAME=player_name
+P_ACTION=A_ENTER_SESSION&P_SESSION_NAME=session_name&P_START_MONEY=start_money&P_MONEY_SMALL_BLIND=money_small_blind&P_PLAYER_NAME=player_name
 ```
 
 
 Server answer:
 ```
-R_OK, R_ERROR
+{
+  valid: R_OK, R_ERROR,
+  session_id: session_id,
+  session_name: session_name
+}
 ```
 
 
