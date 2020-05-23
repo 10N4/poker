@@ -47,4 +47,5 @@ define("PLAYER", "player");
 define("SESSION", "session");
 define("LINK", "link");
 define("PLAYERS", "players");
+define("SESSION_EXISTS", "session_exists");
 

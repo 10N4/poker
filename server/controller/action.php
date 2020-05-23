@@ -19,11 +19,6 @@ function getUpdate($authenticationId): string
     $session = $player->getSession();
     $roles = $session->getRoles();
 
-    /*$dealerId = $session->getDealer();
-    $dealer = Player::getById($dealerId);
-    $smallBlind = $dealer->getNextPlayer();
-    $bigBlind = $smallBlind->getNextPlayer();*/
-
     $players = $player->getAllPlayers();
     $playersEncoded = array();
     /** @var Player $item */
@@ -47,6 +42,8 @@ function getUpdate($authenticationId): string
         CARDS => $session->getCards(),
         PLAYERS => $playersEncoded,
     );
+    $player->setUpdated(true);
+    $player->update();
     return json_encode($result);
 }
 
@@ -59,7 +56,7 @@ function getCards($authenticationId)
 function isSessionExisting($globalSessionId)
 {
     $session = Session::getSessionByGlobalId($globalSessionId);
-    return json_encode([A_SESSION_EXISTS => ($session != null)]);
+    return json_encode([SESSION_EXISTS => ($session != null)]);
 }
 
 /*function validate()
@@ -114,6 +111,7 @@ function enterSession($playerName, $globalSessionId): string
     }
     $player = Player::init($playerName, $session);
     $player->insert();
+    $session->setAllUnUpdated();
     return json_encode(array(
         PLAYER => $player->toJson(Player::AUTHENTICATION_ID, Player::NAME),
         SESSION => $session->toJson(Session::GLOBAL_ID),
@@ -140,10 +138,11 @@ function pause($authenticationId): string
     }
     fold($authenticationId, $player);
     $player->setState(Player::STATE_WATCHING);
+    $player->setLastAction(Player::ACTION_PAUSE);
     return R_OK;
 }
 
-function startRound($authenticationId): string
+function startGame($authenticationId): string
 {
     $player = Player::getPlayerByAuthenticationId($authenticationId);
     if (!$player) {
@@ -157,7 +156,7 @@ function startRound($authenticationId): string
         return R_ERROR;
     }
 
-    $player->setState(Player::STATE_IN_GAME_INACTIVE);
+    $player->setInActive();
     $player->update();
 
     // Start next round if the the first game has not started yet or if everyone performed this action
@@ -169,7 +168,7 @@ function startRound($authenticationId): string
     return R_WAIT;
 }
 
-// Poker Actions
+// region Poker Actions
 function checkOrCall($authenticationId)
 {
     $player = Player::getPlayerByAuthenticationId($authenticationId);
@@ -198,6 +197,9 @@ function betOrRaise($authenticationId, $amount)
     if (!$player->hasState(Player::STATE_IN_GAME_ACTIVE)) {
         return R_ERROR;
     }
+    if ($player->getMoney() < $amount) {
+        return R_ERROR;
+    }
     $session = $player->getSession();
     switch ($session->getState()) {
         case Session::STATE_BET_CHECK:
@@ -222,14 +224,21 @@ function fold($authenticationId, $player = false): string
             return R_ERROR;
         }
     }
+    $session = $player->getSession();
     $playerState = $player->getState();
     if ($playerState == Player::STATE_IN_GAME_INACTIVE || $playerState == Player::STATE_IN_GAME_ACTIVE) {
+        $session->raisePodBy($player->getCurrentBet());
+        $player->clearCurrentBet();
+        $player->clearTotalBet();
+        $player->setLastAction(Player::ACTION_FOLD);
         $player->setState(Player::STATE_AT_THE_TABLE);
     }
     return R_OK;
 }
 
-// Helper Actions
+// endregion
+
+// region Helper Actions
 function check(Player $player, Session $session): string
 {
     // The dealer is the last one playing in a round. If the dealer checks all the others have already checked.
@@ -238,6 +247,7 @@ function check(Player $player, Session $session): string
         $session->update();
     } else {
         $player->setNextPlayerActive();
+        $player->setLastAction(Player::ACTION_CHECK);
         $player->update();
     }
 
@@ -249,6 +259,7 @@ function bet(Player $player, Session $session, $amount): string
     $player->raiseBet($amount);
     $session->setState(Session::STATE_RAISE_CALL);
     $player->setNextPlayerActive();
+    $player->setLastAction(Player::ACTION_BET);
     $session->update();
     $player->update();
 
@@ -264,6 +275,7 @@ function call(Player $player, Session $session): string
         $session->update();
     } else {
         $player->setNextPlayerActive();
+        $player->setLastAction(Player::ACTION_CALL);
         $player->update();
     }
     return R_OK;
@@ -275,11 +287,14 @@ function raise(Player $player, Session $session, $amount): string
     $player->equalizeBet();
     $player->raiseBet($amount);
     $player->setNextPlayerActive();
+    $player->setLastAction(Player::ACTION_RAISE);
     $player->update();
     return R_OK;
 }
 
-// Helper
+// endregion
+
+// region Helper
 function actionPerformable(Player $player, Session $session, ...$neededSessionStates)
 {
     if (!$player->hasState(Player::STATE_IN_GAME_ACTIVE)) {
@@ -318,3 +333,29 @@ function dieSqlError($code, $infos = array())
     }
     die();
 }
+
+// endregion
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -198,6 +198,11 @@ class Player extends DBO
         $this->setCurrentBet(0);
     }
 
+    public function clearTotalBet()
+    {
+        $this->setTotalBet(0);
+    }
+
     /**
      * Sets the bet of the player on the highest bet in the round
      */
@@ -227,6 +232,9 @@ class Player extends DBO
     {
         $this->setInActive();
         $nextPlayer = $this->getNextPlayer();
+        while ($nextPlayer->isAllIn()) {
+            $nextPlayer = $nextPlayer->getNextPlayer();
+        }
         $nextPlayer->setActive();
         $nextPlayer->update();
     }
@@ -256,23 +264,6 @@ class Player extends DBO
         $cards = $cardDeckManager->getRandomCards(2);
         $this->setCard1($cards[0]->__toString());
         $this->setCard2($cards[1]->__toString());
-    }
-
-    /**
-     * Sets the is_updated field of all players of the session false
-     */
-    public static function setAllUnUpdated($sessionId): void
-    {
-        /**
-         * @param Player $player
-         */
-        $setUpdateFalse = function ($player) {
-            $player->setUpdated(false);
-        };
-        /*$load = function() {
-            Player::load(self::SESSION_ID, $sessionId)
-        }
-        static::forEachInstance($setUpdateFalse, );*/
     }
 
     /**
@@ -358,6 +349,11 @@ class Player extends DBO
     {
         $this->setState(self::STATE_IN_GAME_INACTIVE);
         $this->setActiveTime(0);
+    }
+
+    public function isAllIn(): bool
+    {
+        return $this->getMoney() < 0;
     }
 
     // region base
