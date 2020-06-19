@@ -1,0 +1,14 @@
+RewriteEngine On
+
+
+
+# Pfad, unter dem dieses Verzeichnis erreichbar ist:
+RewriteBase /poker
+
+# Umleitung aller Seitenaufrufe auf die index.php
+RewriteCond %{REQUEST_URI} !index.html
+RewriteCond %{REQUEST_URI} !client/.*
+RewriteCond %{REQUEST_URI} !server/.*
+RewriteCond %{REQUEST_URI} !json_test.txt
+
+RewriteRule .* /poker/index.html [L]

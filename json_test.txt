@@ -4,54 +4,56 @@
     "smallBlind": "idyy",
     "activePlayer": "51"
   },
+  "pod": 12345,
+  "currentBet": 250,
   "players": [
     {
       "id": "33",
       "name": "Albert", 
       "money": 5050,
-      "setThisRound": 250
+      "lastAction": "Fold"
     },
     {
       "id": "35",
       "name": "Berta", 
       "money": 3160,
-      "setThisRound": 250
+      "lastAction": "Bet 150"
     },
     {
       "id": "36",
       "name": "Caesar", 
       "money": 1590,
-      "setThisRound": 250
+      "lastAction": "Call"
     },
     {
       "id": "42",
       "name": "David", 
-      "money": 2450,
-      "setThisRound": 250
+      "money": 31415,
+      "lastAction": "Raise 250"
     },
     {
       "id": "51",
       "name": "Eberhart", 
       "money": 3240,
-      "setThisRound": 150
+      "lastAction": ""
     },
     {
       "id": "53",
       "name": "Francois", 
       "money": 6110,
-      "setThisRound": 150
+      "lastAction": ""
     },
     {
       "id": "55",
       "name": "Günter", 
       "money": 4930,
-      "setThisRound": 150
+      "lastAction": "Fold"
     },
     {
       "id": "59",
       "name": "Heribert", 
       "money": 2770,
-      "setThisRound": 150
+      "lastAction": ""
     }
   ],
   "card1": {
@@ -68,7 +70,7 @@
   },
   "card4": {
     "color": "null",
-    "card": 0
+    "card": "10D"
   },
   "card5": {
     "color": "null",
