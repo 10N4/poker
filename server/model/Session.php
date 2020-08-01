@@ -191,19 +191,6 @@ class Session extends DBO
 
     // region Advanced Setter
 
-    /**
-     * Sets the is_updated field of all players at the table of the session false
-     */
-    public function setAllUnUpdated(): void
-    {
-        $players = $this->getPlayersInGame();
-        /** @var Player $player */
-        foreach ($players as $player) {
-            $player->setUpdated(false);
-            $player->update();
-        }
-    }
-
     public function raisePodBy(int $amount): void
     {
         $this->setPod($this->getPod() + $amount);
@@ -311,6 +298,10 @@ class Session extends DBO
         }
     }
 
+    // endregion
+
+    // region Advanced Getter
+
     private function getNextRound()
     {
         switch ($this->getRound()) {
@@ -330,10 +321,6 @@ class Session extends DBO
                 return false;
         }
     }
-
-    // endregion
-
-    // region Advanced Getter
 
     public function areAllBetsEqual()
     {

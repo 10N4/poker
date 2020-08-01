@@ -183,14 +183,18 @@ class Player extends DBO
         return $this->getState() == $state;
     }
 
-    public function raiseBet($amount)
+    public function raiseBet($amount, $strict = true)
     {
+        if (($this->getMoney() < $amount) && $strict) {
+            return false;
+        }
         $this->setMoney($this->getMoney() - $amount);
         $this->setCurrentBet($this->getCurrentBet() + $amount);
         $this->setTotalBet($this->getTotalBet() + $amount);
         $session = $this->getSession();
         $session->setPlayerLastRaisedId($this->getId());
         $session->update();
+        return true;
     }
 
     public function clearCurrentBet()
@@ -205,11 +209,13 @@ class Player extends DBO
 
     /**
      * Sets the bet of the player on the highest bet in the round
+     * @param bool $strict
+     * @return bool
      */
-    public function equalizeBet()
+    public function equalizeBet($strict = true)
     {
         $amount = $this->getHighestBet() - $this->getCurrentBet();
-        $this->raiseBet($amount);
+        return $this->raiseBet($amount, $strict);
     }
 
     /**

@@ -256,7 +256,9 @@ function check(Player $player, Session $session): string
 
 function bet(Player $player, Session $session, $amount): string
 {
-    $player->raiseBet($amount);
+    if (!$player->raiseBet($amount)) {
+        return R_ERROR;
+    }
     $session->setState(Session::STATE_RAISE_CALL);
     $player->setNextPlayerActive();
     $player->setLastAction(Player::ACTION_BET);
@@ -268,7 +270,7 @@ function bet(Player $player, Session $session, $amount): string
 
 function call(Player $player, Session $session): string
 {
-    $player->equalizeBet();
+    $player->equalizeBet(false);
     $player->update();
     if ($session->areAllBetsEqual()) {
         $session->setNextRound();
@@ -284,8 +286,12 @@ function call(Player $player, Session $session): string
 /** @noinspection PhpUnusedParameterInspection */
 function raise(Player $player, Session $session, $amount): string
 {
-    $player->equalizeBet();
-    $player->raiseBet($amount);
+    if (!$player->equalizeBet()) {
+        return R_ERROR;
+    }
+    if (!$player->raiseBet($amount)) {
+        return R_ERROR;
+    }
     $player->setNextPlayerActive();
     $player->setLastAction(Player::ACTION_RAISE);
     $player->update();
