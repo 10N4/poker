@@ -5,7 +5,6 @@ namespace poker_model;
 
 
 use Exception;
-use Throwable;
 
 class ParseException extends Exception
 {

@@ -7,16 +7,16 @@ require_once "Card.php";
 
 class CardDeckManager
 {
-    private $allCards = array();
+    private array $allCards = array();
 
     /**
      * CardDeck constructor.
      * @param array $usedCards
      */
-    public function __construct($usedCards = array())
+    public function __construct(array $usedCards = array())
     {
         for ($number = 2; $number <= 14; $number++) {
-            foreach (Card::getAllColors() as $color) {
+            foreach (Card::getAllSuits() as $color) {
                 $card = new Card($number, $color);
                 if (array_search($card, $usedCards)) {
                     continue;
@@ -41,7 +41,7 @@ class CardDeckManager
         return $this->getRandomCards(1)[0];
     }
 
-    public function getRandomCards($number)
+    public function getRandomCards(int $number): array
     {
         $reducedCards = $this->allCards;
         /*foreach ($usedCards as $usedCard) {

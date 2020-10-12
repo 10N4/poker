@@ -40,7 +40,7 @@ class Player extends DBO
     const ACTIVE_TIME = "active_time";
     const LAST_ACTION = "last_action";
 
-    private $session = 0;
+    private int $session = 0;
 
     // endregion
 

@@ -29,7 +29,7 @@ class HandChecker
 
     private static function isRoyalFlush(Hand $hand): bool
     {
-        return self::isStraight($hand) && self::isFlush($hand) && ($hand->getHighestCard()->getRank() == Card\Rank::ACE);
+        return self::isStraight($hand) && self::isFlush($hand) && ($hand->getHighestCard()->getRank() == poker_model\Rank::ACE);
     }
 
     private static function isFourOfAKind(Hand $hand): bool
@@ -139,12 +139,11 @@ class HandChecker
         return false;
     }
 
-    // Test the shit out of this!
     private static function isStraight(Hand $hand): bool
     {
         $cards = $hand->getSortedByRank();
 
-        if ($hand->getHighestCard() == Card\Rank::ACE) {    // Hand has an ace
+        if ($hand->getHighestCard() == poker_model\Rank::ACE) {    // Hand has an ace
             /* Check if other 4 cards are
              *      K, Q, J, 10
              * or   2, 3, 4, 5
@@ -165,8 +164,8 @@ class HandChecker
                 return false;
             }
 
-            return contains($cards, [Card\Rank::KING, Card\Rank::QUEEN, Card\Rank::JACK, Card\Rank::TEN]) ||   // K, Q, J, 10
-                contains($cards, [Card\Rank::TWO, Card\Rank::THREE, Card\Rank::FOUR, Card\Rank::FIVE]);     // ACE, 2, 3, 4, 5
+            return contains($cards, [poker_model\Rank::KING, poker_model\Rank::QUEEN, poker_model\Rank::JACK, poker_model\Rank::TEN]) ||   // K, Q, J, 10
+                contains($cards, [poker_model\Rank::TWO, poker_model\Rank::THREE, poker_model\Rank::FOUR, poker_model\Rank::FIVE]);        // ACE, 2, 3, 4, 5
         } else {    // Hand has no ace
             $counter = 0;
 
@@ -182,7 +181,9 @@ class HandChecker
 
     public static function getValueOfHand(Hand $hand): int
     {
-        $hand->sort();
+        if (!$hand->isSorted()) {
+            $hand->sort();
+        }
 
         if (self::isRoyalFlush($hand)) {
             return HandEvaluator::getValueOfRoyalFlushHand();

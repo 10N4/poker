@@ -10,67 +10,100 @@ namespace poker_model;
  */
 class Card
 {
-    public const COLOR_DIAMONDS = 'd';
+    /*public const COLOR_DIAMONDS = 'd';
     public const COLOR_HEARTS = 'h';
     public const COLOR_SPADES = 's';
-    public const COLOR_CLUBS = 'c';
-
-    public const NUM_JACK = 11;
-    public const NUM_QUEEN = 12;
-    public const NUM_KING = 13;
-    public const NUM_ACE = 14;
-
+    public const COLOR_CLUBS = 'c'; */
     public const REP_NO_CARD = 0;
 
-    private $number;
-    private $color;
+    private Rank $rank; // "Number"
+    private Suit $suit; // "Color"
+
+    public function __construct($rank, $suit)
+    {
+        $this->rank = $rank;
+        $this->suit = $suit;
+    }
 
     /**
-     * Card constructor.
-     * @param $number
-     * @param $color
+     * @param Card $that
+     * @return int -1 iff $that is deemed larger than this Card,
+     *              1 iff $that is deemed lower than this Card and
+     *              0 iff $that is deemed equal to this Card
      */
-    public function __construct($number, $color)
+    public function compareByRank(Card $that): int
+    {
+        // Check for rank first
+        if ($this->getRank() < $that->getRank()) {
+            return -1;
+        }
+        if ($this->getRank() > $that->getRank()) {
+            return 1;
+        }
+
+        // Ranks must be equal, check for suit now
+        if ($this->getSuit() < $that->getSuit()) {
+            return -1;
+        }
+        if ($this->getSuit() > $that->getSuit()) {
+            return 1;
+        }
+
+        // Both objects must be equal
+        return 0;
+    }
+
+    /**
+     * @param Card $that
+     * @return int -1 iff $that is deemed larger than this Card,
+     *              1 iff $that is deemed lower than this Card and
+     *              0 iff $that is deemed equal to this Card
+     */
+    public function compareBySuit(Card $that): int
+    {
+        // Check for suit first
+        if ($this->getSuit() < $that->getSuit()) {
+            return -1;
+        }
+        if ($this->getSuit() > $that->getSuit()) {
+            return 1;
+        }
+
+        // Suits must be equal, check for rank now
+        if ($this->getRank() < $that->getRank()) {
+            return -1;
+        }
+        if ($this->getRank() > $that->getRank()) {
+            return 1;
+        }
+
+        // Both objects must be equal
+        return 0;
+    }
+
+    public function getSuit(): Suit
+    {
+        return $this->suit;
+    }
+
+    public function setSuit(Suit $suit): void
+    {
+        $this->suit = $suit;
+    }
+
+    public function getRank(): Rank
+    {
+        return $this->rank;
+    }
+
+    public function setRank(Rank $number): void
     {
         $this->number = $number;
-        $this->color = $color;
     }
 
-    /**
-     * @return int
-     */
-    public function getNumber(): int
+    public static function getAllSuits(): array
     {
-        return $this->number;
-    }
-
-    /**
-     * @param int $number
-     */
-    public function setNumber(int $number): void
-    {
-        $this->number = $number;
-    }
-
-    /**
-     * @return string
-     */
-    public function getColor(): string
-    {
-        return $this->color;
-    }
-
-    /**
-     * @param string $color
-     */
-    public function setColor(string $color): void
-    {
-        $this->color = $color;
-    }
-
-    public static function getAllColors()
-    {
-        return array(self::COLOR_DIAMONDS, self::COLOR_HEARTS, self::COLOR_SPADES, self::COLOR_CLUBS);
+        return array(Suit::DIAMONDS, Suit::HEARTS, Suit::SPADES, Suit::CLUBS);
     }
 
     /**
@@ -79,9 +112,9 @@ class Card
      * @return Card
      * @throws ParseException
      */
-    public static function parse(string $rep): Card
+    public static function parse(string $rep): Card // Todo: Rep must contain numbers for Suit instead of characters
     {
-        $colors = implode('', self::getAllColors());
+        $colors = implode('', self::getAllSuits());
         if (preg_match("/^[$colors][2-9]|(1[0-4])$/", $rep)) {
             $color = $rep[0];
             $number = substr($rep, 1, strlen($rep));
@@ -93,6 +126,31 @@ class Card
 
     public function __toString()
     {
-        return $this->getColor() . $this->getNumber();
+        return $this->getSuit() . " " . $this->getRank();
     }
+}
+
+abstract class Suit
+{
+    const DIAMONDS = 0; // Karo
+    const HEARTS = 1;   // Herz
+    const SPADES = 2;   // Piek
+    const CLUBS = 3;    // Kreuz
+}
+
+abstract class Rank
+{
+    const TWO = 2;
+    const THREE = 3;
+    const FOUR = 4;
+    const FIVE = 5;
+    const SIX = 6;
+    const SEVEN = 7;
+    const EIGHT = 8;
+    const NINE = 9;
+    const TEN = 10;
+    const JACK = 11;
+    const QUEEN = 12;
+    const KING = 13;
+    const ACE = 14;
 }

@@ -1,7 +1,7 @@
 <?php
 
 
-use Card\Card;
+use poker_model\Card;
 
 class Hand
 {
@@ -60,7 +60,7 @@ class Hand
      */
     private function descendingSelectionSort(array $a, CardComparator $comparator): array
     {
-        function swap(array &$a, int $i, int $j)
+        function swap(array &$a, int $i, int $j): void
         {
             if ($i == $j) {
                 return;
@@ -114,5 +114,10 @@ class Hand
     public function getSortedByRank(): array
     {
         return $this->sortedByRank;
+    }
+
+    public function isSorted(): bool
+    {
+        return $this->isSorted;
     }
 }

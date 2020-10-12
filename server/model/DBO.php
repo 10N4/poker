@@ -16,9 +16,9 @@ abstract class DBO
     const ID = 'id';
     const ID_NOT_CREATED = 0;
 
-    private $id = self::ID_NOT_CREATED;
-    private $values = array();
-    private $pseudoValues = array();
+    private int $id = self::ID_NOT_CREATED;
+    private array $values = array();
+    private array $pseudoValues = array();
 
     /**
      * Prevents the use of a constructor with parameters in subclasses. Use an init function instead.
