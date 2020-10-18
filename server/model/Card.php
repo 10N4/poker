@@ -3,6 +3,10 @@
 
 namespace poker_model;
 
+// Used to emulate a java-like enum
+Suit::init();
+Rank::init();
+
 /**
  *
  * Class Card
@@ -16,8 +20,8 @@ class Card
     public const COLOR_CLUBS = 'c'; */
     public const REP_NO_CARD = 0;
 
-    private Rank $rank; // "Number"
-    private Suit $suit; // "Color"
+    private $rank; // "Number"
+    private $suit; // "Color"
 
     public function __construct($rank, $suit)
     {
@@ -34,18 +38,18 @@ class Card
     public function compareByRank(Card $that): int
     {
         // Check for rank first
-        if ($this->getRank() < $that->getRank()) {
+        if (Rank::compare($this->getRank(), $that->getRank()) == -1) {  // this < that
             return -1;
         }
-        if ($this->getRank() > $that->getRank()) {
+        if (Rank::compare($this->getRank(), $that->getRank()) == 1) {   // this > that
             return 1;
         }
 
         // Ranks must be equal, check for suit now
-        if ($this->getSuit() < $that->getSuit()) {
+        if (Suit::compare($this->getSuit(), $that->getSuit()) == -1) {  // this < that
             return -1;
         }
-        if ($this->getSuit() > $that->getSuit()) {
+        if (Suit::compare($this->getSuit(), $that->getSuit()) == 1) {   // this > that
             return 1;
         }
 
@@ -62,18 +66,18 @@ class Card
     public function compareBySuit(Card $that): int
     {
         // Check for suit first
-        if ($this->getSuit() < $that->getSuit()) {
+        if (Suit::compare($this->getSuit(), $that->getSuit()) == -1) {  // this < that
             return -1;
         }
-        if ($this->getSuit() > $that->getSuit()) {
+        if (Suit::compare($this->getSuit(), $that->getSuit()) == 1) {   // this > that
             return 1;
         }
 
         // Suits must be equal, check for rank now
-        if ($this->getRank() < $that->getRank()) {
+        if (Rank::compare($this->getRank(), $that->getRank()) == -1) {  // this < that
             return -1;
         }
-        if ($this->getRank() > $that->getRank()) {
+        if (Rank::compare($this->getRank(), $that->getRank()) == 1) {   // this > that
             return 1;
         }
 
@@ -96,14 +100,14 @@ class Card
         return $this->rank;
     }
 
-    public function setRank(Rank $number): void
+    public function setRank(Rank $rank): void
     {
-        $this->number = $number;
+        $this->rank = $rank;
     }
 
     public static function getAllSuits(): array
     {
-        return array(Suit::DIAMONDS, Suit::HEARTS, Suit::SPADES, Suit::CLUBS);
+        return array(Suit::$DIAMONDS, Suit::$HEARTS, Suit::$SPADES, Suit::$CLUBS);
     }
 
     /**
@@ -130,27 +134,109 @@ class Card
     }
 }
 
-abstract class Suit
+class Suit
 {
-    const DIAMONDS = 0; // Karo
-    const HEARTS = 1;   // Herz
-    const SPADES = 2;   // Piek
-    const CLUBS = 3;    // Kreuz
+    public static Suit $DIAMONDS;   // Karo
+    public static Suit $HEARTS;     // Herz
+    public static Suit $SPADES;     // Piek
+    public static Suit $CLUBS;      // Kreuz
+    private int $value;
+
+    public static function init(): void
+    {
+        static::$DIAMONDS = new Suit(0);
+        static::$HEARTS = new Suit(1);
+        static::$SPADES = new Suit(2);
+        static::$CLUBS = new Suit(3);
+    }
+
+    private function __construct(int $value)
+    {
+        $this->value = $value;
+    }
+
+    public static function compare(Suit $s1, Suit $s2): int     // Todo: Interface Comparator?
+    {
+        if ($s1->value < $s2->value) {
+            return -1;
+        }
+        if ($s1->value > $s2->value) {
+            return 1;
+        }
+
+        return 0;
+    }
+
+    public function __toString(): string
+    {
+        switch ($this) {
+            case Suit::$DIAMONDS:
+                return 'diamonds';
+            case Suit::$HEARTS:
+                return 'hearts';
+            case Suit::$SPADES:
+                return 'spades';
+            case Suit::$CLUBS:
+                return 'clubs';
+            default:
+                return 'Invalid Suit!';
+        }
+    }
 }
 
-abstract class Rank
+class Rank
 {
-    const TWO = 2;
-    const THREE = 3;
-    const FOUR = 4;
-    const FIVE = 5;
-    const SIX = 6;
-    const SEVEN = 7;
-    const EIGHT = 8;
-    const NINE = 9;
-    const TEN = 10;
-    const JACK = 11;
-    const QUEEN = 12;
-    const KING = 13;
-    const ACE = 14;
+    public static Rank $TWO;
+    public static Rank $THREE;
+    public static Rank $FOUR;
+    public static Rank $FIVE;
+    public static Rank $SIX;
+    public static Rank $SEVEN;
+    public static Rank $EIGHT;
+    public static Rank $NINE;
+    public static Rank $TEN;
+    public static Rank $JACK;
+    public static Rank $QUEEN;
+    public static Rank $KING;
+    public static Rank $ACE;
+    private int $value;
+
+    public static function init(): void
+    {
+        static::$TWO = new Rank(2);
+        static::$THREE = new Rank(3);
+        static::$FOUR = new Rank(4);
+        static::$FIVE = new Rank(5);
+        static::$SIX = new Rank(6);
+        static::$SEVEN = new Rank(7);
+        static::$EIGHT = new Rank(8);
+        static::$NINE = new Rank(9);
+        static::$TEN = new Rank(10);
+        static::$JACK = new Rank(11);
+        static::$QUEEN = new Rank(12);
+        static::$KING = new Rank(13);
+        static::$ACE = new Rank(14);
+    }
+
+    private function __construct(int $value)
+    {
+        $this->value = $value;
+    }
+
+    public static function compare(Rank $r1, Rank $r2): int     // Todo: Interface Comparator?
+    {
+        if ($r1->value < $r2->value) {
+            return -1;
+        }
+        if ($r1->value > $r2->value) {
+            return 1;
+        }
+
+        return 0;
+    }
+
+    public function __toString(): string
+    {
+        return (string)$this->value;
+    }
 }
