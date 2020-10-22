@@ -1,7 +1,8 @@
 <?php
 
 
-use poker_model\Card;
+namespace poker_model;
+require_once "CardComparator.php";
 
 class Hand
 {
@@ -20,7 +21,16 @@ class Hand
     public function __construct(array $cards)
     {
         if (count($cards) != self::NUMBER_OF_CARDS) {
-            throw new InvalidHandException();
+            throw new InvalidHandException(/*'Given card array does not contain the right number of cards!'*/);
+        }
+
+        // Check for duplicate cards
+        for ($i = 0; $i < self::NUMBER_OF_CARDS - 1; $i++) {
+            for ($j = $i + 1; $j < self::NUMBER_OF_CARDS; $j++) {
+                if ($cards[$i] == $cards[$j]) {
+                    throw new InvalidHandException(/*'Duplicate card in given array!'*/);
+                }
+            }
         }
 
         $this->cards = $cards;
@@ -80,7 +90,10 @@ class Hand
                 }
             }
 
-            swap($a, $i, $k);
+            $tmp = $a[$i];
+            $a[$i] = $a[$k];
+            $a[$k] = $tmp;
+            //swap($a, $i, $k);
         }
 
         return $a;
@@ -104,6 +117,8 @@ class Hand
                 return $c1->compareByRank($c2);
             }
         });
+
+        throw new \RuntimeException('running sortByRank()');
     }
 
     public function getSortedBySuit(): array

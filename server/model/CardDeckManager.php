@@ -2,7 +2,6 @@
 
 
 namespace poker_model;
-require_once "Card.php";
 
 
 class CardDeckManager

@@ -6,6 +6,7 @@
 
 /// Wenn man davon ausgeht, dass eine Hand eine feste Anzahl von Karten hat,
 /// genügt es, nur anfangskarte und endkarte zu vergleichen!
+namespace poker_model;
 
 class HandChecker
 {

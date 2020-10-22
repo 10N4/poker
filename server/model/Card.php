@@ -14,14 +14,10 @@ Rank::init();
  */
 class Card
 {
-    /*public const COLOR_DIAMONDS = 'd';
-    public const COLOR_HEARTS = 'h';
-    public const COLOR_SPADES = 's';
-    public const COLOR_CLUBS = 'c'; */
     public const REP_NO_CARD = 0;
 
-    private $rank; // "Number"
-    private $suit; // "Color"
+    private Rank $rank; // Number
+    private Suit $suit; // Color
 
     public function __construct($rank, $suit)
     {

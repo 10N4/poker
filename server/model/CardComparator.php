@@ -1,7 +1,7 @@
 <?php
 
 
-use poker_model\Card;
+namespace poker_model;
 
 interface CardComparator
 {

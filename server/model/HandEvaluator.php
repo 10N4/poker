@@ -1,5 +1,6 @@
 <?php
 
+namespace poker_model;
 
 class HandEvaluator
 {
