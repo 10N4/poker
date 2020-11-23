@@ -1,0 +1,10 @@
+[
+    [
+        'id' => 5,
+        'meine_erste_spalte' => 'Niklas'
+    ],
+    [
+        'id' => 5,
+        'meine_erste_spalte' => 'Simon'
+    ]
+]

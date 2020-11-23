@@ -7,6 +7,7 @@ require_once "server/controller/action.php";
 require_once "server/model/DBO.php";
 require_once "server/model/Player.php";
 require_once "server/model/Session.php";
+require_once "server/global.php";
 
 
 //clean();
@@ -133,10 +134,21 @@ function testSessionExisting()
     echo isSessionExisting($globalId);
 }
 
+// '' OR 0 = 0
 
+$id = $_POST['id'];
+// id = 5
 
+// Don't
+pdo()->query("SELECT * FROM meine_tabelle WHERE id = $id");
 
+// Do
+$stmt = pdo()->prepare("SELECT 'id', 'meine_erste_spalte' FROM meine_tabelle WHERE id = :id");
+$stmt->bindValue(':id', $id);
+$stmt->execute();
+$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+var_dump($result);
 
 
 
