@@ -61,6 +61,12 @@ class Card
      */
     public function compareBySuit(Card $that): int
     {
+        $suitCompare = Suit::compare($this->getSuit(), $that->getSuit());
+        if ($suitCompare != 0) return $suitCompare;
+        return Rank::compare($this->getRank(), $that->getRank());
+
+
+
         // Check for suit first
         if (Suit::compare($this->getSuit(), $that->getSuit()) == -1) {  // this < that
             return -1;
